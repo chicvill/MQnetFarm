@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data files
+data/live_data.json
+data/smartfarm_tsdb.csv
+data/growth_log.json
+data/journal.json
+
+# Environment
+.env
+venv/
+env/

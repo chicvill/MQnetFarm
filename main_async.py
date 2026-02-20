@@ -335,7 +335,6 @@ async def web_server_task():
                 self.send_error(500, str(e))
 
     # 현재 디렉토리를 서빙하는 핸들러 생성
-    handler = list # python 3.7+ workaround not needed for class based
     
     while PORT < 8010:
         try:
