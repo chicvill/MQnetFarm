@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQnetFarm Smart System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: auto;
+            height: 40px;
+            background: transparent;
+            border-radius: 0;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: none;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            /* Space for expanded view */
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .status-pill {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(0, 255, 157, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 157, 0);
+            }
+        }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- Flow Visualizer (Centerpiece) --- */
+        .flow-container {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .flow-diagram {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Abstract Node Circles */
+        .node-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .node-circle:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .node-circle i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .node-circle span {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .node-circle:hover i,
+        .node-circle:hover span {
+            color: var(--primary);
+        }
+
+        /* Connections */
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .connection-line::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 20%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            border-radius: 2px;
+            animation: flowAnimation 2s linear infinite;
+        }
+
+        @keyframes flowAnimation {
+            0% {
+                left: 0;
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        /* Position Nodes - Adjusted for larger size */
+        .node-sensor {
+            top: 15%;
+            left: 5%;
+            border-color: rgba(0, 255, 157, 0.5);
+        }
+
+        .node-logic {
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border-color: rgba(112, 0, 255, 0.8);
+            box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
+            z-index: 20;
+        }
+
+        .node-actuator {
+            top: 15%;
+            right: 5%;
+            border-color: rgba(255, 184, 0, 0.5);
+        }
+
+        .node-db {
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- Quick Stats --- */
+        .stats-container {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .stat-box.highlight .stat-value {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        /* --- Action Panel --- */
+        .action-container {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+        }
+
+        .action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn i {
+            color: var(--primary);
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .action-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* --- Footer Console --- */
+        .console-log {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: #000;
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            color: var(--text-muted);
+            overflow-y: auto;
+            opacity: 0.9;
+            mask-image: linear-gradient(to bottom, transparent, black 10%);
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-time {
+            color: var(--secondary);
+        }
+
+        .log-info {
+            color: var(--primary);
+        }
+
+        .log-error {
+            color: var(--danger);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .status-badge.normal {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-badge.warning {
+            background: rgba(255, 184, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-badge.danger {
+            background: rgba(255, 0, 85, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            animation: blink 0.5s infinite;
+        }
+
+        /* Emergency Overlay */
+        #emergency-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            z-index: 9999;
+            pointer-events: none;
+            border: 5px solid red;
+            box-shadow: inset 0 0 100px red;
+            animation: blink-bg 1s infinite;
+        }
+
+        @keyframes blink-bg {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="emergency-overlay"></div>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo"><span>MQ</span>net</div>
+
+        <a href="index.html" class="nav-item active">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header>
+            <div class="page-title">
+                <h1>통합 관제 시스템 (Mission Control)</h1>
+                <p>SmartFarm Integrated Management System v2.0</p>
+            </div>
+            <div class="system-status">
+                <div class="status-pill">
+                    <div class="status-dot"></div>
+                    시스템 정상 (Online)
+                </div>
+                <div class="status-pill" style="border-color: var(--primary); color: var(--primary);">
+                    <i data-lucide="cpu" size="14"></i>
+                    CPU 12%
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+
+            <!-- Center: System Flow Visualization -->
+            <div class="card flow-container">
+                <div class="card-header">
+                    <div class="card-title"><i data-lucide="activity"></i> 시스템 데이터 흐름도</div>
+                    <div id="real-time-clock" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                        2024-00-00 00:00:00</div>
+                </div>
+
+                <div class="flow-diagram">
+                    <!-- Nodes -->
+                    <div class="node-circle node-sensor" onclick="location.href='dashboard.html'">
+                        <i data-lucide="thermometer"></i>
+                        <span>센서 데이터</span>
+                    </div>
+
+                    <div class="node-circle node-logic" onclick="location.href='recipe_manager.html'">
+                        <i data-lucide="cpu"></i>
+                        <span>제어 로직</span>
+                    </div>
+
+                    <div class="node-circle node-actuator" onclick="location.href='dashboard.html'">
+                        <i data-lucide="wind"></i>
+                        <span>장치 구동</span>
+                    </div>
+
+                    <div class="node-circle node-db" onclick="location.href='configurator.html'">
+                        <i data-lucide="database"></i>
+                        <span>데이터 저장</span>
+                    </div>
+
+                    <!-- CSS-only connections for visual -->
+                    <div class="connection-line" style="top: 35%; left: 18%; width: 27%; transform: rotate(25deg);">
+                    </div>
+                    <div class="connection-line"
+                        style="top: 35%; right: 18%; width: 27%; transform: rotate(-25deg); animation-delay: 1s;"></div>
+                    <div class="connection-line"
+                        style="top: 65%; left: 50%; width: 1px; height: 15%; transform: translateX(-50%); background: linear-gradient(to bottom, var(--primary), transparent);">
+                    </div>
+                </div>
+
+                <!-- Live Log Overlay -->
+                <div class="console-log" id="console-output">
+                    <!-- Logs injected by JS -->
+                </div>
+            </div>
+
+            <!-- Right Top: Quick Stats & Safety Monitoring -->
+            <div class="stats-container">
+                <!-- Row 1: Basic Stats -->
+                <div class="stat-box highlight">
+                    <div class="stat-value" id="stat-nodes">12</div>
+                    <div class="stat-label">활성 노드 (Active)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-sensors">48</div>
+                    <div class="stat-label">연결된 센서</div>
+                </div>
+
+                <!-- Row 2: Special Monitoring -->
+                <div class="stat-box" id="monitor-fire" style="border-color: rgba(255,255,255,0.1)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                        <i data-lucide="flame" style="color:var(--danger)"></i>
+                        <span class="status-badge normal">정상</span>
+                    </div>
+                    <div class="stat-value" style="font-size:1.2rem">화재 감시</div>
+                    <div class="stat-label">Zone A, B, C</div>
+                </div>
+
+                <div class="stat-box" id="monitor-security" style="border-color: rgba(255,255,255,0.1)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                        <i data-lucide="lock" style="color:var(--success)"></i>
+                        <span class="status-badge normal">안전</span>
+                    </div>
+                    <div class="stat-value" style="font-size:1.2rem">출입 보안</div>
+                    <div class="stat-label">Main Gate</div>
+                </div>
+
+                <div class="stat-box" id="monitor-weather" style="border-color: rgba(255,255,255,0.1)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                        <i data-lucide="cloud-rain" style="color:var(--primary)"></i>
+                        <span class="status-badge normal">맑음</span>
+                    </div>
+                    <div class="stat-value" style="font-size:1.2rem">옥외 기상</div>
+                    <div class="stat-label">Wind: 2m/s</div>
+                </div>
+
+                <div class="stat-box" id="monitor-device" style="border-color: rgba(255,255,255,0.1)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                        <i data-lucide="cpu" style="color:var(--success)"></i> <!-- Changed to success default -->
+                        <span class="status-badge normal">Good</span>
+                    </div>
+                    <div class="stat-value" style="font-size:1.2rem">기기 상태</div>
+                    <div
+                        style="font-size:0.75rem; color:var(--text-muted); margin-top:5px; display:flex; flex-direction:column; gap:2px">
+                        <div id="check-heartbeat">📡 통신 상태: <span style="color:var(--success)">양호 (12ms)</span></div>
+                        <div id="check-sensor">🌡️ 데이터 무결성: <span style="color:var(--success)">정상</span></div>
+                        <div id="check-power">🔋 전원 안정성: <span style="color:var(--success)">안정 (12.1V)</span></div>
+                        <div id="check-control">⚙️ 제어 피드백: <span style="color:var(--success)">일치 (Match)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulation Control (Dev Only) -->
+            <div class="card" style="grid-column: 2; margin-top: -10px; padding: 1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px">🚨 재난 상황 시뮬레이션 (Click to Test)
+                </div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap">
+                    <button onclick="simulateEmergency('FIRE')"
+                        style="font-size:0.7rem; padding:5px 8px; background:rgba(255,0,0,0.2); border:1px solid var(--danger); color:var(--danger); cursor:pointer">🔥
+                        화재</button>
+                    <button onclick="simulateEmergency('INTRUSION')"
+                        style="font-size:0.7rem; padding:5px 8px; background:rgba(255,165,0,0.2); border:1px solid var(--warning); color:var(--warning); cursor:pointer">🏃
+                        침입</button>
+                    <button onclick="simulateEmergency('STORM')"
+                        style="font-size:0.7rem; padding:5px 8px; background:rgba(0,100,255,0.2); border:1px solid var(--secondary); color:#fff; cursor:pointer">⛈️
+                        태풍</button>
+                    <button onclick="simulateEmergency('FAULT')"
+                        style="font-size:0.7rem; padding:5px 8px; background:rgba(128,128,128,0.2); border:1px solid #aaa; color:#aaa; cursor:pointer">⚡
+                        고장</button>
+                </div>
+            </div>
+
+            <!-- Right Bottom: Quick Actions -->
+            <div class="card action-container">
+                <div class="card-header">
+                    <div class="card-title"><i data-lucide="zap"></i> 바로가기 (Quick Access)</div>
+                </div>
+                <div class="action-list">
+                    <a href="infra_tree.html" class="action-btn">
+                        <i data-lucide="map"></i>
+                        <div>
+                            <div class="action-title">농장 구조 관리 (Manage Infra)</div>
+                            <div class="action-desc">구역 및 게이트웨이 추가/삭제</div>
+                        </div>
+                    </a>
+                    <a href="configurator.html" class="action-btn">
+                        <i data-lucide="sliders"></i>
+                        <div>
+                            <div class="action-title">장치 상세 설정 (Config)</div>
+                            <div class="action-desc">센서 및 제어 장치, 핀 번호 설정</div>
+                        </div>
+                    </a>
+                    <a href="recipe_manager.html" class="action-btn">
+                        <i data-lucide="clock"></i>
+                        <div>
+                            <div class="action-title">자동화 규칙 (Automation)</div>
+                            <div class="action-desc">작물별 생육 환경 및 타이머 설정</div>
+                        </div>
+                    </a>
+                    <div class="action-btn"
+                        style="border-color: rgba(255, 0, 85, 0.3); background: rgba(255, 0, 85, 0.05); cursor: pointer;"
+                        onclick="alert('비상 정지 신호 전송됨!')">
+                        <i data-lucide="alert-triangle" style="color: var(--danger)"></i>
+                        <div>
+                            <div class="action-title" style="color: var(--danger)">비상 정지 (Emergency Stop)</div>
+                            <div class="action-desc">모든 장비 동작을 즉시 정지합니다</div>
+                        </div>
+                    </div>
+
+                    <!-- Profit Display Added (Moved) -->
+                    <div class="action-btn"
+                        style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+                        <i data-lucide="coins" style="color: var(--success); width: 40px; height: 40px;"></i>
+                        <div>
+                            <div class="action-title" style="color: var(--success); font-size: 1.2rem;">예상 총 생산액</div>
+                            <div class="action-desc" id="total-revenue-display"
+                                style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 5px;">
+                                ₩ 0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // Icon initialization
+        lucide.createIcons();
+
+        // Simulated Console Logs
+        const logContent = document.getElementById('console-output');
+        const messages = [
+            { type: 'info', text: 'System initialization complete.' },
+            { type: 'info', text: 'Connected to Gateway GW-01' },
+            { type: 'log', text: 'Reading sensor data from Zone A...' },
+            { type: 'info', text: 'Logic Core: Checking humidity thresholds' },
+            { type: 'success', text: 'Actuation: Fan turned ON (Zone B)' },
+            { type: 'info', text: 'Data synced to cloud storage' }
+        ];
+
+        function addLog() {
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${msg.type === 'success' ? 'log-info' : ''}">${msg.text}</span>`;
+
+            logContent.prepend(div);
+            if (logContent.children.length > 10) logContent.lastChild.remove();
+        }
+
+        setInterval(addLog, 2000);
+
+        // Initial fake logs
+        for (let i = 0; i < 5; i++) addLog();
+
+        // Fetch real stats if available (optional enhancement)
+        async function updateStats() {
+            try {
+                // 1. Live Data
+                const res = await fetch('/data/live_data.json');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('stat-nodes').innerText = Object.keys(data.nodes || {}).length;
+
+                    let sensorCount = 0;
+                    Object.values(data.nodes || {}).forEach(n => sensorCount += (n.sensors || []).length);
+                    document.getElementById('stat-sensors').innerText = sensorCount;
+                }
+
+                // 2. Calculate Revenue
+                const [zonesRes, gwRes] = await Promise.all([
+                    fetch('/data/zone_config.json'),
+                    fetch('/data/gateway_config.json')
+                ]);
+
+                if (zonesRes.ok && gwRes.ok) {
+                    const zones = await zonesRes.json();
+                    const gateways = await gwRes.json();
+
+                    let totalRevenue = 0;
+
+                    // Simple logic: Count nodes per zone -> Calculate profit
+                    // Since we don't have direct node count in zone_config, use gateways as proxy or fetch full config
+                    // Let's fetch full config for accurate node counts
+                    const nodesRes = await fetch('/data/config.json');
+                    if (nodesRes.ok) {
+                        const allNodes = await nodesRes.json();
+
+                        zones.forEach(z => {
+                            // Find nodes belonging to this zone (id starts with zone id)
+                            const nodeCount = allNodes.filter(n => n.id.startsWith(z.id)).length;
+                            const eco = z.economy || { yield_per_node: 0, price_per_kg: 0, loss_rate: 0 };
+                            const profit = (eco.yield_per_node * nodeCount * eco.price_per_kg) * (1 - eco.loss_rate / 100);
+                            totalRevenue += profit;
+                        });
+                    }
+
+                    document.getElementById('total-revenue-display').innerText = `₩ ${Math.floor(totalRevenue).toLocaleString()}`;
+                }
+            } catch (e) { console.error(e); }
+        }
+        setInterval(updateStats, 5000);
+        updateStats();
+
+        // Real-time Clock
+        function updateClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const timeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            const clockEl = document.getElementById('real-time-clock');
+            if (clockEl) clockEl.innerText = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Emergency Simulation Logic ---
+        function simulateEmergency(type) {
+            const overlay = document.getElementById('emergency-overlay');
+            const logPanel = document.getElementById('console-output');
+
+            let msg = "";
+            let targetId = "";
+
+            // Reset all first
+            resetStatus();
+
+            overlay.style.display = 'block';
+
+            if (type === 'FIRE') {
+                msg = "🔥 [긴급] Zone B 화재 감지! 스프링클러 자동 작동 중";
+                targetId = 'monitor-fire';
+                updateBadge(targetId, '경보', 'danger');
+                sendAlert("카카오톡 알림 전송: [화재 경보] 농장에 화재가 감지되었습니다!");
+                playAlarmSound();
+            } else if (type === 'INTRUSION') {
+                msg = "🏃 [보안] Main Gate 침입 감지! 보안 업체에 통보합니다.";
+                targetId = 'monitor-security';
+                updateBadge(targetId, '침입', 'danger');
+                sendAlert("SMS 전송: [침입 경보] 비인가 침입이 감지되었습니다.");
+                playAlarmSound();
+            } else if (type === 'STORM') {
+                msg = "⛈️ [기상] 태풍 경보 발령. 윈치 커튼을 닫습니다.";
+                targetId = 'monitor-weather';
+                updateBadge(targetId, '강풍', 'warning');
+                sendAlert("시스템 알림: 옥외 기상 악화로 보호 모드 전환.");
+                overlay.style.border = "5px solid yellow";
+                overlay.style.boxShadow = "inset 0 0 100px yellow";
+            } else if (type === 'FAULT') {
+                // Random Fault Type
+                const rand = Math.random();
+                if (rand < 0.25) {
+                    msg = "⚡ [통신 장애] Node-04 Heartbeat Lost (Over 180s)";
+                    updateDeviceStatus("check-heartbeat", "응답 없음", "failed");
+                } else if (rand < 0.50) {
+                    msg = "🌡️ [센서 오류] Temp Sensor #2 Out of Range (999.9°C)";
+                    updateDeviceStatus("check-sensor", "값 이상", "failed");
+                } else if (rand < 0.75) {
+                    msg = "⚙️ [구동기 고장] Heater ON but Temp Stable (No Change)";
+                    updateDeviceStatus("check-control", "반응 없음", "failed");
+                } else {
+                    msg = "🔋 [전원 경보] Node-01 Battery Critical (10.5V)";
+                    updateDeviceStatus("check-power", "저전압", "warning");
+                }
+
+                targetId = 'monitor-device';
+                updateBadge(targetId, '점검필요', 'warning');
+                sendAlert("유지보수 알림: 장비 이상 감지됨.");
+                overlay.style.display = 'none';
+            }
+
+            // Log
+            const time = new Date().toLocaleTimeString('ko-KR');
+            logPanel.innerHTML = `<div class="log-entry" style="font-weight:bold; color:${type === 'STORM' ? 'yellow' : '#ff5555'}"><span class="log-time">[${time}]</span> ${msg}</div>` + logPanel.innerHTML;
+        }
+
+        function resetStatus() {
+            document.getElementById('emergency-overlay').style.display = 'none';
+            document.getElementById('emergency-overlay').style.border = "5px solid red";
+            document.getElementById('emergency-overlay').style.boxShadow = "inset 0 0 100px red";
+
+            updateBadge('monitor-fire', '정상', 'normal');
+            updateBadge('monitor-security', '안전', 'normal');
+            updateBadge('monitor-weather', '맑음', 'normal');
+
+            // Device Reset
+            updateBadge('monitor-device', 'Good', 'normal');
+            document.getElementById('check-heartbeat').innerHTML = '📡 통신 상태: <span style="color:var(--success)">양호 (12ms)</span>';
+            document.getElementById('check-sensor').innerHTML = '🌡️ 데이터 무결성: <span style="color:var(--success)">정상</span>';
+            document.getElementById('check-power').innerHTML = '🔋 전원 안정성: <span style="color:var(--success)">안정 (12.1V)</span>';
+            document.getElementById('check-control').innerHTML = '⚙️ 제어 피드백: <span style="color:var(--success)">일치 (Match)</span>';
+        }
+
+        function updateDeviceStatus(id, text, status) {
+            const color = status === 'failed' ? 'var(--danger)' : 'var(--warning)';
+            const label = document.getElementById(id).innerText.split(':')[0];
+            document.getElementById(id).innerHTML = `${label}: <span style="color:${color}; font-weight:bold">${text}</span>`;
+        }
+
+        function updateBadge(id, text, type) {
+            const el = document.getElementById(id).querySelector('.status-badge');
+            el.className = `status-badge ${type}`;
+            el.innerText = text;
+        }
+
+        function sendAlert(text) {
+            // Simulate Toast Notification
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.background = '#333';
+            toast.style.color = '#fff';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '8px';
+            toast.style.borderLeft = '5px solid #00f2ff';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+            toast.style.animation = 'slideIn 0.5s forwards';
+            toast.innerText = text;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function playAlarmSound() {
+            // Visual feedback for sound
+            console.log("🔊 Playing Alarm Sound...");
+        }
+
+        // Auto-reset after 10 seconds for demo
+        setInterval(() => {
+            // Optional: clear emergency manually or auto
+        }, 10000);
+
+    </script>
+</body>
+
+</html>

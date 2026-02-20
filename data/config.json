@@ -1,0 +1,268 @@
+[
+    {
+        "id": "AAA",
+        "sensors": [
+            {
+                "id": "AAA001",
+                "name": "pH 센서",
+                "type": "analog",
+                "min": 5.5,
+                "max": 6.5,
+                "target_min": "AAA105",
+                "msg_id_min": "PH_UP",
+                "target_max": "AAA106",
+                "msg_id_max": "PH_DOWN"
+            },
+            {
+                "id": "AAA002",
+                "name": "EC 센서",
+                "type": "analog",
+                "min": 1.2,
+                "max": 2.0,
+                "target_min": "AAA107",
+                "msg_id_min": "NUTRIENT_A",
+                "target_max": "AAA108",
+                "msg_id_max": "DILUTE"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAA105",
+                "name": "pH Up 펌프",
+                "type": "digital"
+            },
+            {
+                "id": "AAA106",
+                "name": "pH Down 펌프",
+                "type": "digital"
+            },
+            {
+                "id": "AAA107",
+                "name": "양액(A) 펌프",
+                "type": "digital"
+            },
+            {
+                "id": "AAA108",
+                "name": "배수 밸브",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAB",
+        "sensors": [
+            {
+                "id": "AAB001",
+                "name": "pH 센서",
+                "type": "analog",
+                "min": 5.5,
+                "max": 6.5,
+                "target_min": "AAB105",
+                "msg_id_min": "PH_UP",
+                "target_max": "AAB106",
+                "msg_id_max": "PH_DOWN"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAB105",
+                "name": "pH Up 펌프",
+                "type": "digital"
+            },
+            {
+                "id": "AAB106",
+                "name": "pH Down 펌프",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAC",
+        "sensors": [
+            {
+                "id": "AAC001",
+                "name": "수위 센서",
+                "type": "analog",
+                "min": 20,
+                "max": 80,
+                "target_min": "AAC104",
+                "msg_id_min": "REFILL",
+                "target_max": "AAC103",
+                "msg_id_max": "DRAIN"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAC103",
+                "name": "배수 밸브",
+                "type": "digital"
+            },
+            {
+                "id": "AAC104",
+                "name": "급수 밸브",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAD",
+        "sensors": [
+            {
+                "id": "AAD001",
+                "name": "온도 센서",
+                "type": "digital",
+                "min": 20,
+                "max": 28,
+                "target_min": "AAD109",
+                "msg_id_min": "HEATING",
+                "target_max": "AAD110",
+                "msg_id_max": "COOLING"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAD109",
+                "name": "히터",
+                "type": "digital"
+            },
+            {
+                "id": "AAD110",
+                "name": "냉각기",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAE",
+        "sensors": [
+            {
+                "id": "AAE001",
+                "name": "조도(PPFD) 센서",
+                "type": "analog",
+                "min": 300,
+                "max": 800,
+                "target_min": "AAE111",
+                "msg_id_min": "LIGHT_ON"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAE111",
+                "name": "LED 성장등",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAF",
+        "sensors": [
+            {
+                "id": "AAF001",
+                "name": "DO(용존산소) 센서",
+                "type": "analog",
+                "min": 5.0,
+                "max": 10.0,
+                "target_min": "AAF102",
+                "msg_id_min": "AIR_PUMP_ON"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAF102",
+                "name": "에어 펌프",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAG",
+        "sensors": [
+            {
+                "id": "AAG001",
+                "name": "습도 센서",
+                "type": "analog",
+                "min": 40,
+                "max": 75,
+                "target_max": "AAG112",
+                "msg_id_max": "FAN_ON"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAG112",
+                "name": "유동 팬",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAH",
+        "sensors": [
+            {
+                "id": "AAH001",
+                "name": "CO2 센서",
+                "type": "analog",
+                "min": 400,
+                "max": 1000,
+                "target_min": "AAH103",
+                "msg_id_min": "CO2_INJECT"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAH103",
+                "name": "환풍기",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAI",
+        "sensors": [
+            {
+                "id": "AAI001",
+                "name": "수온 센서",
+                "type": "analog",
+                "min": 18,
+                "max": 24,
+                "target_min": "AAI109",
+                "msg_id_min": "W_HEAT",
+                "target_max": "AAI110",
+                "msg_id_max": "W_COOL"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAI109",
+                "name": "히터",
+                "type": "digital"
+            },
+            {
+                "id": "AAI110",
+                "name": "냉각기",
+                "type": "digital"
+            }
+        ]
+    },
+    {
+        "id": "AAJ",
+        "sensors": [
+            {
+                "id": "AAJ001",
+                "name": "양액탱크 레벨 센서",
+                "type": "analog",
+                "min": 20,
+                "max": 80,
+                "target_min": "AAJ107",
+                "msg_id_min": "REFILL_NUTRIENT"
+            }
+        ],
+        "actuators": [
+            {
+                "id": "AAJ107",
+                "name": "양액(A) 펌프",
+                "type": "digital"
+            }
+        ]
+    }
+]

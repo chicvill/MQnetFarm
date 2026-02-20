@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 관제 (CCTV) - SmartFarm</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- CCTV Grid --- */
+        .cctv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .cam-card {
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            aspect-ratio: 16/9;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .cam-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .cam-feed {
+            flex: 1;
+            background: #000;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .cam-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        .cam-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rec-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .cam-info {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cam-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .cam-loc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Add Button */
+        .add-cam-card {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.01);
+            transition: all 0.2s;
+            aspect-ratio: 16/9;
+        }
+
+        .add-cam-card:hover {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">M</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item active">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>영상 관제 (CCTV Surveillance)</h1>
+                <p>Real-time Crop Monitoring System</p>
+            </div>
+            <div style="display:flex; gap:10px">
+                <button onclick="showGuideModal()"
+                    style="padding: 10px 15px; background: rgba(255,255,255,0.1); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer;">
+                    <i data-lucide="help-circle" style="vertical-align:middle; width:16px; margin-right:5px"></i> 연결 가이드
+                </button>
+                <button onclick="showAddModal()"
+                    style="padding: 10px 20px; background: var(--primary); border: none; border-radius: 8px; font-weight: 600; color: #000; cursor: pointer;">
+                    + 카메라 추가
+                </button>
+            </div>
+        </header>
+
+        <div class="cctv-grid" id="cam-grid">
+            <!-- Rendered via JS -->
+        </div>
+    </main>
+
+    <!-- Guide Modal -->
+    <div id="guideModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+        <div
+            style="background:#1E293B; padding:30px; border-radius:16px; width:600px; max-width:90%; border:1px solid var(--border); color:white">
+            <h2 style="margin-bottom:20px; color:var(--primary)">📸 CCTV 연결 가이드 및 추천</h2>
+
+            <h3 style="color:var(--secondary); margin-bottom:10px">1. 추천 카메라 모델</h3>
+            <ul style="margin-bottom:20px; margin-left:20px; color:var(--text-muted); line-height:1.6">
+                <li><strong>ESP32-CAM (강추):</strong> 저렴하고(만원 이하) 작아서 좁은 농장 구석구석에 배치하기 좋습니다. WiFi로 MJPEG 스트리밍을 바로 쏴주어 웹
+                    연동이 가장 쉽습니다.</li>
+                <li><strong>TP-Link Tapo / 샤오미 홈캠:</strong> 구하기 쉽고 화질이 좋습니다. 앱에서 'RTSP 모드'를 켜면 연결할 수 있습니다. (단, 웹 변환 서버
+                    필요 가능성 있음)</li>
+                <li><strong>구형 스마트폰:</strong> 'IP Webcam' 앱을 설치하면 훌륭한 무선 CCTV가 됩니다.</li>
+            </ul>
+
+            <h3 style="color:var(--secondary); margin-bottom:10px">2. 연결 방법</h3>
+            <p style="color:var(--text-muted); margin-bottom:10px">카메라가 WiFi에 연결된 후 할당받은 <strong>IP 주소</strong>와
+                <strong>스트림 URL</strong>이 필요합니다.
+            </p>
+            <div
+                style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-family:monospace; margin-bottom:20px">
+                ESP32-CAM 예시: <span style="color:var(--success)">http://192.168.0.50:81/stream</span><br>
+                IP Webcam 앱 예시: <span style="color:var(--success)">http://192.168.0.10:8080/video</span>
+            </div>
+
+            <div style="text-align:right">
+                <button onclick="document.getElementById('guideModal').style.display='none'"
+                    style="padding:8px 20px; border-radius:8px; border:none; background:var(--primary); font-weight:bold; cursor:pointer">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit/Add Modal -->
+    <div id="editModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+        <div
+            style="background:#1E293B; padding:30px; border-radius:16px; width:400px; border:1px solid var(--border); color:white">
+            <h2 id="modalTitle" style="margin-bottom:20px">카메라 설정</h2>
+
+            <label style="display:block; margin-bottom:5px; font-size:0.9rem">카메라 이름 (Name)</label>
+            <input type="text" id="camName" placeholder="예: Zone A CCTV"
+                style="width:100%; padding:10px; margin-bottom:15px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; border-radius:6px">
+
+            <label style="display:block; margin-bottom:5px; font-size:0.9rem">설치 위치 (Location)</label>
+            <input type="text" id="camLoc" placeholder="예: 상추 생육실"
+                style="width:100%; padding:10px; margin-bottom:15px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; border-radius:6px">
+
+            <label style="display:block; margin-bottom:5px; font-size:0.9rem">스트림 URL (Stream Link)</label>
+            <input type="text" id="camUrl" placeholder="http://192.168.x.x:81/stream"
+                style="width:100%; padding:10px; margin-bottom:20px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; border-radius:6px">
+
+            <div style="display:flex; gap:10px">
+                <button onclick="saveCamera()"
+                    style="flex:1; padding:10px; border:none; border-radius:6px; background:var(--primary); font-weight:bold; cursor:pointer">저장</button>
+                <button onclick="closeEditModal()"
+                    style="flex:1; padding:10px; border:1px solid var(--border); border-radius:6px; background:transparent; color:white; cursor:pointer">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen View Modal -->
+    <div id="fsModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:3000; flex-direction:column;">
+        <div
+            style="padding:15px; background:rgba(0,0,0,0.5); position:absolute; top:0; width:100%; display:flex; justify-content:space-between; z-index:3001; align-items:center;">
+            <h2 id="fsTitle" style="color:white; margin:0">CAM VIEW</h2>
+            <button onclick="closeFullscreen()"
+                style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; border-radius:4px; cursor:pointer; font-weight:bold; margin-left:auto">✕
+                닫기 (ESC)</button>
+        </div>
+        <img id="fsImage" src="" style="width:100%; height:100%; object-fit:contain;">
+    </div>
+
+    <!-- Analysis Result Modal -->
+    <div id="analysisModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:4000; justify-content:center; align-items:center;">
+        <div
+            style="background:#1E293B; width:800px; max-width:95%; border-radius:16px; border:1px solid var(--success); overflow:hidden; display:flex; flex-direction:column; max-height:90vh;">
+            <div
+                style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(0,255,157,0.1)">
+                <h2 style="color:var(--success); display:flex; align-items:center; gap:10px">
+                    <i data-lucide="scan-line"></i> <span id="an-title">생육 분석 결과</span>
+                </h2>
+                <button onclick="closeAnalysisModal()"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer">✕</button>
+            </div>
+
+            <div id="an-loading" style="padding:50px; text-align:center; color:var(--text-muted)">
+                <i data-lucide="loader-2" class="spin" style="width:48px; height:48px; margin-bottom:20px;"></i>
+                <p>AI Vision Engine이 이미지를 분석 중입니다...</p>
+                <p style="font-size:0.8rem; margin-top:10px;">(Green Masking & Pixel Counting)</p>
+            </div>
+
+            <div id="an-content" style="display:none; padding:20px; overflow-y:auto;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div style="flex:2; min-width:300px;">
+                        <span style="display:block; margin-bottom:10px; color:var(--text-muted)">분석된 이미지 (Green
+                            Mask)</span>
+                        <img id="an-result-img" src=""
+                            style="width:100%; border-radius:8px; border:1px solid var(--border);">
+                    </div>
+                    <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:15px;">
+                        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+                            <span style="color:var(--text-muted); font-size:0.9rem">Leaf Area Ratio (엽면적 비율)</span>
+                            <div id="val-ratio" style="font-size:2.5rem; font-weight:bold; color:var(--success)">0.0%
+                            </div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+                            <span style="color:var(--text-muted); font-size:0.9rem">Green Pixels (픽셀 수)</span>
+                            <div id="val-pixels" style="font-size:1.5rem; font-weight:bold; color:white">0 px</div>
+                        </div>
+                        <div
+                            style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border-left:3px solid var(--warning);">
+                            <span style="color:var(--warning); font-size:0.9rem; font-weight:bold">AI Insight</span>
+                            <p id="val-feedback" style="margin-top:5px; font-size:0.95rem; line-height:1.4">분석 결과 대기
+                                중...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding:15px; background:rgba(0,0,0,0.2); text-align:right; border-top:1px solid var(--border)">
+                <button onclick="closeAnalysisModal()"
+                    style="padding:10px 20px; background:var(--primary); border:none; border-radius:6px; font-weight:bold; cursor:pointer">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Sample Data
+        let cameras = [
+            { name: "CAM-01", loc: "Zone A: 상추 생육실", url: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?q=80&w=800&auto=format&fit=crop" },
+            { name: "CAM-02", loc: "Zone B: 육묘장", url: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?q=80&w=800&auto=format&fit=crop" },
+            { name: "CAM-03 (Wireless)", loc: "Zone C: 이동식 로봇", url: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?q=80&w=800&auto=format&fit=crop" }
+        ];
+
+        let editIndex = -1;
+
+        function renderCameras() {
+            const grid = document.getElementById('cam-grid');
+            grid.innerHTML = cameras.map((c, i) => `
+                <div class="cam-card">
+                    <div class="cam-feed" onclick="openFullscreen(${i})" style="cursor:zoom-in" title="클릭하여 확대">
+                        <img src="${c.url}" alt="${c.name}" onerror="this.src='https://placehold.co/600x400?text=No+Signal'">
+                        <div class="cam-overlay">
+                            <div class="rec-dot"></div> LIVE
+                        </div>
+                    </div>
+                    <div class="cam-info">
+                        <div>
+                            <div class="cam-title">${c.name}</div>
+                            <div class="cam-loc">${c.loc}</div>
+                        </div>
+                        <div style="display:flex; gap:10px">
+                             <i data-lucide="sprout" title="생육 분석 (Growth Analysis)" style="cursor: pointer; color: var(--success); width:20px" onclick="analyzeGrowth('${c.url}', '${c.name}')"></i>
+                             <i data-lucide="settings-2" style="cursor: pointer; color: var(--text-muted); width:20px" onclick="openEditModal(${i})"></i>
+                             <i data-lucide="trash-2" style="cursor: pointer; color: var(--danger); width:20px" onclick="deleteCamera(${i})"></i>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add 'New Camera' card
+            grid.innerHTML += `
+               <div class="add-cam-card" onclick="showAddModal()">
+                    <i data-lucide="plus-circle" style="width: 50px; height: 50px; margin-bottom: 15px;"></i>
+                    <span>카메라 연결 추가</span>
+                </div>
+            `;
+
+            lucide.createIcons();
+        }
+
+        // --- Edit/Add Logic ---
+        function showAddModal() {
+            editIndex = -1;
+            document.getElementById('modalTitle').innerText = "새 카메라 추가";
+            document.getElementById('camName').value = "";
+            document.getElementById('camLoc').value = "";
+            document.getElementById('camUrl').value = "";
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function openEditModal(idx) {
+            editIndex = idx;
+            const c = cameras[idx];
+            document.getElementById('modalTitle').innerText = "카메라 설정 변경";
+            document.getElementById('camName').value = c.name;
+            document.getElementById('camLoc').value = c.loc;
+            document.getElementById('camUrl').value = c.url;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveCamera() {
+            const name = document.getElementById('camName').value;
+            const loc = document.getElementById('camLoc').value;
+            const url = document.getElementById('camUrl').value;
+
+            if (!name) return alert("카메라 이름을 입력해주세요.");
+
+            const newCam = { name, loc, url };
+
+            if (editIndex >= 0) {
+                cameras[editIndex] = newCam;
+            } else {
+                cameras.push(newCam);
+            }
+
+            closeEditModal();
+            renderCameras();
+        }
+
+        function deleteCamera(idx) {
+            if (confirm("정말로 이 카메라를 삭제하시겠습니까?")) {
+                cameras.splice(idx, 1);
+                renderCameras();
+            }
+        }
+
+        // --- Guide Logic ---
+        function showGuideModal() {
+            document.getElementById('guideModal').style.display = 'flex';
+        }
+
+        // --- Fullscreen Logic ---
+        function openFullscreen(idx) {
+            const c = cameras[idx];
+            document.getElementById('fsTitle').innerText = `${c.name} - ${c.loc}`;
+            document.getElementById('fsImage').src = c.url;
+            document.getElementById('fsModal').style.display = 'flex';
+        }
+
+        function closeFullscreen() {
+            document.getElementById('fsModal').style.display = 'none';
+            document.getElementById('fsImage').src = "";
+        }
+
+        // --- Analysis Logic ---
+        async function analyzeGrowth(url, name) {
+            const modal = document.getElementById('analysisModal');
+            document.getElementById('an-result-img').src = "";
+            document.getElementById('an-loading').style.display = 'block';
+            document.getElementById('an-content').style.display = 'none';
+            modal.style.display = 'flex';
+
+            lucide.createIcons();
+
+            try {
+                const res = await fetch('/api/analyze_growth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // Show Result
+                document.getElementById('an-loading').style.display = 'none';
+                document.getElementById('an-content').style.display = 'block';
+
+                document.getElementById('an-title').innerText = `🌱 ${name} 생육 분석 결과`;
+                // Add timestamp to prevent caching
+                document.getElementById('an-result-img').src = data.image_url + "?t=" + new Date().getTime();
+
+                document.getElementById('val-ratio').innerText = data.ratio + "%";
+                document.getElementById('val-pixels').innerText = data.green_pixels.toLocaleString() + " px";
+
+                let feedback = "초기 생육 단계입니다. (Sprouting)";
+                if (data.ratio > 30) feedback = "생육이 매우 왕성합니다! 수확 시기가 다가오고 있습니다. (Mature)";
+                else if (data.ratio > 10) feedback = "정상적으로 잘 자라고 있습니다. (Growing)";
+                else if (data.ratio < 1) feedback = "식물이 거의 감지되지 않습니다. (Not Detected)";
+
+                document.getElementById('val-feedback').innerText = feedback;
+
+            } catch (e) {
+                alert("분석 실패: " + e.message);
+                closeAnalysisModal();
+            }
+        }
+
+        function closeAnalysisModal() {
+            document.getElementById('analysisModal').style.display = 'none';
+        }
+
+        // Close fullscreen on ESC
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                closeFullscreen();
+                closeEditModal();
+                document.getElementById('guideModal').style.display = 'none';
+                document.getElementById('analysisModal').style.display = 'none';
+            }
+        });
+
+        // Init
+        renderCameras();
+    </script>
+</body>
+
+</html>

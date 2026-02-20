@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 분석 및 영농 일지 (Data & Analytics) - SmartFarm</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Analysis Grid --- */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Chart Area */
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+        }
+
+        /* Journal List */
+        .journal-list {
+            flex: 1;
+            overflow-y: auto;
+            border-top: 1px solid var(--border);
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+
+        .journal-entry {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            border-left: 3px solid var(--text-muted);
+        }
+
+        .journal-entry.work {
+            border-left-color: var(--primary);
+        }
+
+        .journal-entry.harvest {
+            border-left-color: var(--success);
+        }
+
+        .journal-entry.pest {
+            border-left-color: var(--danger);
+        }
+
+        .journal-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .journal-content {
+            color: var(--text-main);
+        }
+
+        /* Controls */
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        input,
+        select,
+        textarea {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        /* Fix Calendar Icon Visibility */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        button.btn-primary {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">M</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item active">
+            <i data-lucide="file-text" class="nav-icon"></i> <!-- New Icon -->
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>데이터 분석 및 영농 일지 (Analytics & Journal)</h1>
+                <p>Data-driven Farming & Record Keeping</p>
+            </div>
+            <div class="control-bar">
+                <input type="date" id="date-picker" onchange="loadData()">
+                <select id="zone-select">
+                    <option value="A">Zone A (상추)</option>
+                    <option value="B">Zone B (육묘)</option>
+                </select>
+                <button class="btn-primary" onclick="loadData()">조회</button>
+            </div>
+        </header>
+
+        <div class="analysis-grid">
+            <!-- Chart Section -->
+            <div class="card" style="grid-column: 1 / 2; grid-row: 1 / 2;">
+                <div class="card-header">
+                    <div class="card-title"><i data-lucide="line-chart"></i> 환경 데이터 추세 (Temp & Humidity)</div>
+                    <select style="width: 120px;">
+                        <option>온도/습도</option>
+                        <option>CO2/일조량</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="envChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Comparison / Insight Section -->
+            <div class="card" style="grid-column: 1 / 2; grid-row: 2 / 3;">
+                <div class="card-header">
+                    <div class="card-title"><i data-lucide="bar-chart-2"></i> 생육 비교 및 에너지 소비 (Growth vs Energy)</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Journal Section -->
+            <div class="card" style="grid-column: 2 / 3; grid-row: 1 / 3;">
+                <div class="card-header">
+                    <div class="card-title"><i data-lucide="book-open"></i> 스마트 영농 일지</div>
+                    <button class="btn-primary" onclick="addJournal()" style="font-size:0.8rem; padding:5px 10px;">+
+                        기록</button>
+                </div>
+
+                <!-- Quick input -->
+                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:10px;">
+                    <select id="log-type" style="width:100%; margin-bottom:5px;">
+                        <option value="work">🛠️ 일반 작업 (Maintenance)</option>
+                        <option value="harvest">🌾 수확 (Harvest)</option>
+                        <option value="pest">🐛 병해충 방제 (Pest Control)</option>
+                    </select>
+                    <textarea id="log-content" placeholder="작업 내용을 입력하세요..."
+                        style="width:100%; height:60px; resize:none;"></textarea>
+                </div>
+
+                <div class="journal-list" id="journal-container">
+                    <!-- Dynamic Entries -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // --- Date Init ---
+        document.getElementById('date-picker').valueAsDate = new Date();
+
+        // --- Chart 1: Environment ---
+        const ctxEnv = document.getElementById('envChart').getContext('2d');
+        const envChart = new Chart(ctxEnv, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                datasets: [
+                    {
+                        label: '온도 (°C)',
+                        data: [18, 17, 19, 24, 25, 21, 19],
+                        borderColor: '#00f2ff',
+                        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '습도 (%)',
+                        data: [60, 65, 55, 45, 40, 55, 62],
+                        borderColor: '#7000ff',
+                        backgroundColor: 'rgba(112, 0, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8899ac' } } },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8899ac' } },
+                    x: { grid: { display: false }, ticks: { color: '#8899ac' } }
+                }
+            }
+        });
+
+        // --- Chart 2: Growth vs Energy ---
+        const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(ctxGrowth, {
+            type: 'bar',
+            data: {
+                labels: [], // Dynamic
+                datasets: [
+                    {
+                        label: '생장률 (Growth Ratio %)',
+                        data: [],
+                        backgroundColor: '#00ff9d',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: '전력 소비 (kWh)', // Still Dummy for now
+                        data: [],
+                        backgroundColor: '#ffb800',
+                        yAxisID: 'y1',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8899ac' } } },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#00ff9d' },
+                        title: { display: true, text: '생장률 (%)', color: '#00ff9d' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#ffb800' },
+                        title: { display: true, text: '전력 (kWh)', color: '#ffb800' }
+                    },
+                    x: { grid: { display: false }, ticks: { color: '#8899ac' } }
+                }
+            }
+        });
+
+        async function fetchGrowthData() {
+            try {
+                const res = await fetch('/api/growth');
+                if (!res.ok) return;
+
+                const logs = await res.json();
+
+                // Process Data: group by date or just show all points
+                // Simple version: Show last 7 entries
+                const recentLogs = logs.slice(-7);
+
+                const labels = recentLogs.map(l => l.date.substring(5, 10)); // MM-DD
+                const ratios = recentLogs.map(l => l.ratio);
+
+                // Dummy Energy Data (Random for demo)
+                const energies = recentLogs.map(() => Math.floor(Math.random() * 10) + 10);
+
+                growthChart.data.labels = labels;
+                growthChart.data.datasets[0].data = ratios;
+                growthChart.data.datasets[1].data = energies;
+                growthChart.update();
+
+            } catch (e) {
+                console.error("Growth Data Error: ", e);
+            }
+        }
+
+        // Load initial data
+        fetchGrowthData();
+
+        // --- Journal Logic ---
+        function renderJournal(journals) {
+            const container = document.getElementById('journal-container');
+            if (journals.length === 0) {
+                container.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:20px;">기록된 일지가 없습니다.</div>`;
+                return;
+            }
+            container.innerHTML = journals.map(j => `
+                <div class="journal-entry ${j.type}">
+                    <div class="journal-date">${j.date}</div>
+                    <div class="journal-content">${j.content}</div>
+                </div>
+            `).join('');
+        }
+
+        async function fetchJournal() {
+            try {
+                const res = await fetch('/api/journal');
+                if (res.ok) {
+                    const journals = await res.json();
+                    renderJournal(journals);
+                }
+            } catch (e) {
+                console.error("Journal Load Error:", e);
+            }
+        }
+
+        async function addJournal() {
+            const type = document.getElementById('log-type').value;
+            const content = document.getElementById('log-content').value;
+            if (!content) return alert("내용을 입력해주세요.");
+
+            const now = new Date().toLocaleString('ko-KR'); // Format nicely
+            const entry = { type, date: now, content };
+
+            try {
+                const res = await fetch('/api/journal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry)
+                });
+
+                if (res.ok) {
+                    document.getElementById('log-content').value = "";
+                    fetchJournal(); // Refresh list
+                } else {
+                    alert("저장에 실패했습니다.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("서버 오류: " + e.message);
+            }
+        }
+
+        // Initial Load
+        fetchJournal();
+
+        async function loadData() {
+            const dateInput = document.getElementById('date-picker').value;
+            if (!dateInput) return alert("날짜를 선택해주세요.");
+
+            try {
+                // Fetch from Python Backend API
+                const res = await fetch(`/api/history?date=${dateInput}`);
+                if (!res.ok) throw new Error("데이터를 불러오는데 실패했습니다.");
+
+                const data = await res.json();
+
+                // 데이터가 비어있는 경우
+                if (data.temp.length === 0 && data.humi.length === 0) {
+                    alert(`${dateInput} 날짜의 데이터가 없습니다.`);
+                    return;
+                }
+
+                // Update Chart
+                // labels: 시간축 (간단히 모든 데이터의 시간을 합쳐서 정렬하거나, 하나를 기준)
+                // 여기서는 temp 데이터를 기준으로 시간축 재설정
+                const labels = data.temp.map(d => d.t);
+                const temps = data.temp.map(d => d.y);
+                const humis = data.humi.map(d => d.y); // 주의: 시간축이 다를 수 있음, 실제론 매칭 필요
+
+                envChart.data.labels = labels;
+                envChart.data.datasets[0].data = temps; // Temp
+                envChart.data.datasets[1].data = humis; // Humi (Optional: might mismatch length)
+
+                envChart.update();
+                alert("데이터 조회 완료!");
+
+            } catch (e) {
+                console.error(e);
+                alert("서버 통신 오류: " + e.message);
+            }
+        }
+
+        renderJournal();
+
+    </script>
+</body>
+
+</html>

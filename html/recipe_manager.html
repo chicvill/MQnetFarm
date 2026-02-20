@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm | Recipe Manager</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2ECC71;
+            --secondary: #3498DB;
+            --bg: #0F172A;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #F8FAFC;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #F59E0B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px;
+            background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 .icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        button:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2);
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .crop-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            transition: transform 0.3s ease;
+        }
+
+        .crop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .crop-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: capitalize;
+        }
+
+        .stage-section {
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .stage-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .param-name {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .param-value {
+            font-family: 'Outfit', sans-serif;
+            color: var(--accent);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1E293B;
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            border-radius: 12px;
+            background: var(--primary);
+            font-weight: 600;
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <h1><a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 2.5rem;"
+                    title="메인으로 이동">🏠</a><span class="icon">🌱</span> 작물 레시피 관리 (Recipe Manager)</h1>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="copyRecipeJson()">📋 설정 복사</button>
+                <button onclick="downloadRecipeJson()">💾 파일 저장</button>
+                <button onclick="showAddModal()">+ 새 작물 레시피 추가</button>
+            </div>
+        </div>
+
+        <div id="recipeGrid" class="recipe-grid">
+            <!-- Loaded via JS -->
+        </div>
+    </div>
+
+    <!-- Edit Modal (Simplified for demo) -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">레시피 수정/추가</h2>
+            <br>
+            <label>작물 이름 (Crop Name)</label>
+            <input type="text" id="cropName" placeholder="예: lettuce">
+            <label>생육 단계 (Stage)</label>
+            <input type="text" id="stageName" placeholder="예: growth">
+
+            <div class="form-row">
+                <div style="flex:1">
+                    <label>온도 최소값 (Temp Min) ℃</label>
+                    <input type="number" id="tempMin" step="0.1">
+                </div>
+                <div style="flex:1">
+                    <label>온도 최대값 (Temp Max) ℃</label>
+                    <input type="number" id="tempMax" step="0.1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex:1">
+                    <label>pH 최소값 (pH Min)</label>
+                    <input type="number" id="phMin" step="0.1">
+                </div>
+                <div style="flex:1">
+                    <label>pH 최대값 (pH Max)</label>
+                    <input type="number" id="phMax" step="0.1">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button style="flex: 1; background: var(--primary);" onclick="saveRecipe()">저장 (Save)</button>
+                <button style="flex: 1;" onclick="hideModal()">취소 (Cancel)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="noti" class="notification">저장되었습니다! (Saved)</div>
+
+    <script>
+        let catalog = {};
+
+        async function loadCatalog() {
+            try {
+                const res = await fetch('/data/catalog_crop.json');
+                catalog = await res.json();
+                renderCatalog();
+            } catch (e) {
+                console.error("Failed to load catalog", e);
+            }
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('recipeGrid');
+            grid.innerHTML = '';
+
+            for (const [crop, stages] of Object.entries(catalog)) {
+                const card = document.createElement('div');
+                card.className = 'crop-card';
+
+                let stagesHtml = '';
+                for (const [stage, params] of Object.entries(stages)) {
+                    stagesHtml += `
+                        <div class="stage-section">
+                            <div class="stage-title">
+                                <span>단계: ${stage.toUpperCase()}</span>
+                                <span style="cursor:pointer;color:var(--secondary)" onclick="editStage('${crop}', '${stage}')">수정 (Edit)</span>
+                            </div>
+                            ${Object.entries(params).map(([key, val]) => `
+                                <div class="param-row">
+                                    <span class="param-name">${key}</span>
+                                    <span class="param-value">${val.min} ~ ${val.max}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="crop-header">
+                        <span class="crop-name">${crop}</span>
+                    </div>
+                    ${stagesHtml}
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function showAddModal() {
+            document.getElementById('modalTitle').innerText = 'Add New Recipe';
+            document.getElementById('cropName').value = '';
+            document.getElementById('stageName').value = '';
+            document.getElementById('tempMin').value = '';
+            document.getElementById('tempMax').value = '';
+            document.getElementById('phMin').value = '';
+            document.getElementById('phMax').value = '';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function editStage(crop, stage) {
+            document.getElementById('modalTitle').innerText = `Edit: ${crop}.${stage}`;
+            document.getElementById('cropName').value = crop;
+            document.getElementById('stageName').value = stage;
+
+            const params = catalog[crop][stage];
+            document.getElementById('tempMin').value = params.Temp?.min || 0;
+            document.getElementById('tempMax').value = params.Temp?.max || 0;
+            document.getElementById('phMin').value = params.pH?.min || 0;
+            document.getElementById('phMax').value = params.pH?.max || 0;
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        async function saveRecipe() {
+            const crop = document.getElementById('cropName').value.toLowerCase();
+            const stage = document.getElementById('stageName').value.toLowerCase();
+
+            if (!catalog[crop]) catalog[crop] = {};
+            catalog[crop][stage] = {
+                "Temp": {
+                    min: parseFloat(document.getElementById('tempMin').value),
+                    max: parseFloat(document.getElementById('tempMax').value)
+                },
+                "pH": {
+                    min: parseFloat(document.getElementById('phMin').value),
+                    max: parseFloat(document.getElementById('phMax').value)
+                }
+            };
+
+            // In a real app, you'd send a POST request to update the JSON file.
+            // For this demo, we local update and show notification.
+            renderCatalog();
+            hideModal();
+            showNotification();
+        }
+
+
+        function copyRecipeJson() {
+            navigator.clipboard.writeText(JSON.stringify(catalog, null, 4)).then(() => {
+                const noti = document.getElementById('noti');
+                noti.textContent = "JSON Copied to Clipboard!";
+                showNotification();
+            });
+        }
+
+        function downloadRecipeJson() {
+            const blob = new Blob([JSON.stringify(catalog, null, 4)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "catalog_crop.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showNotification() {
+            const noti = document.getElementById('noti');
+            noti.classList.add('show');
+            setTimeout(() => noti.classList.remove('show'), 3000);
+        }
+
+        loadCatalog();
+    </script>
+</body>
+
+</html>

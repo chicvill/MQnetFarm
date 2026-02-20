@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm | Infrastructure Tree</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10B981;
+            --secondary: #3B82F6;
+            --bg: #0F172A;
+            --sidebar-bg: #1E293B;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #F8FAFC;
+            --text-dim: #94A3B8;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #F59E0B;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- Main Layout --- */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background-image: radial-gradient(circle at 0% 0%, #172554 0%, transparent 50%);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Tree Structure --- */
+        .tree-container {
+            max-width: 800px;
+        }
+
+        .tree-item {
+            margin-bottom: 15px;
+            user-select: none;
+        }
+
+        .tree-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tree-header:hover {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+            transform: translateX(5px);
+        }
+
+        .tree-header.active {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+
+        .tree-toggle {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-dim);
+        }
+
+        .tree-toggle.open {
+            transform: rotate(90deg);
+        }
+
+        .tree-icon {
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .tree-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .tree-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+        }
+
+        .tree-children {
+            margin-left: 40px;
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 1px solid var(--border);
+            display: none;
+        }
+
+        .tree-children.show {
+            display: block;
+        }
+
+        /* --- Sliding Drawer --- */
+        .drawer {
+            width: 450px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border);
+            position: fixed;
+            right: -450px;
+            top: 0;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-close {
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .drawer-close:hover {
+            color: var(--danger);
+        }
+
+        .drawer-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .detail-title {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .detail-label {
+            color: var(--text-dim);
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .device-list {
+            list-style: none;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .device-item .icon {
+            margin-right: 12px;
+        }
+
+        .device-item .info {
+            flex: 1;
+        }
+
+        .device-item .name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .device-item .meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* --- Tooltip --- */
+        [data-tooltip] {
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-tooltip]:before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 10px;
+            background: #000;
+            color: #fff;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        [data-tooltip]:hover:before {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-content">
+        <h1><a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 2rem;" title="Home">🏠</a>
+            <span class="icon-gradient">🏗️</span> Infra Hierarchy
+        </h1>
+
+        <div id="treeViewport" class="tree-container">
+            <!-- Tree items injected here -->
+        </div>
+    </div>
+
+    <!-- Sliding Drawer -->
+    <div id="sideDrawer" class="drawer">
+        <div class="drawer-header">
+            <h2 id="drawerTitle">Infrastructure Detail</h2>
+            <span class="drawer-close" onclick="closeDrawer()">&times;</span>
+        </div>
+        <div id="drawerContent" class="drawer-content">
+            <!-- Details injected here -->
+        </div>
+    </div>
+
+    <script>
+        const DRAWER = document.getElementById('sideDrawer');
+        const VIEWPORT = document.getElementById('treeViewport');
+
+        // 추가 데이터 저장소
+        let fullConfig = [];
+        let zoneConfigs = [];
+        let gatewayConfigs = [];
+        let cropCatalog = {};
+        let totalFarmProfit = 0;
+
+        async function loadHierarchy() {
+            try {
+                // 설정 파일들을 병렬로 로드
+                const [nodes, zones, gateways, crops] = await Promise.all([
+                    fetch('/data/config.json').then(r => r.json()),
+                    fetch('/data/zone_config.json').then(r => r.json()),
+                    fetch('/data/gateway_config.json').then(r => r.json()),
+                    fetch('/data/catalog_crop.json').then(r => r.json())
+                ]);
+
+                fullConfig = nodes;
+                zoneConfigs = zones;
+                gatewayConfigs = gateways;
+                cropCatalog = crops;
+
+                // 구역-게이트웨이-노드 맵 작성을 위한 데이터 병합
+                const zoneMap = {};
+
+                // 1. 구역 기반 구조 생성
+                zoneConfigs.forEach(z => {
+                    zoneMap[z.id] = { ...z, gateways: {} };
+                });
+
+                // 2. 게이트웨이 정보 매핑 (구역 하위에 게이트웨이 배치)
+                gatewayConfigs.forEach(gw => {
+                    const zoneId = gw.id.substring(0, 2);
+                    if (zoneMap[zoneId]) {
+                        zoneMap[zoneId].gateways[gw.id] = { ...gw, nodes: [] };
+                    }
+                });
+
+                // 3. 노드 정보 매핑 (게이트웨이 하위에 노드 배치)
+                fullConfig.forEach(node => {
+                    const zoneId = node.id.substring(0, 2);
+                    const gwId = node.id.substring(0, 2); // 예시: AA 구역의 노드는 AA 게이트웨이에 속함
+
+                    if (zoneMap[zoneId]) {
+                        // 게이트웨이가 등록되어 있지 않으면 임시 생성
+                        if (!zoneMap[zoneId].gateways[gwId]) {
+                            zoneMap[zoneId].gateways[gwId] = { id: gwId, name: `GW-${gwId}`, nodes: [] };
+                        }
+                        zoneMap[zoneId].gateways[gwId].nodes.push(node);
+                    }
+                });
+
+                renderTree(zoneMap);
+            } catch (error) {
+                console.error("Hierarchy Load Error:", error);
+            }
+        }
+
+        function renderTree(zoneMap) {
+            VIEWPORT.innerHTML = '';
+
+            // 전역 수익 합산 계산
+            totalFarmProfit = 0;
+            Object.values(zoneMap).forEach(z => {
+                const nodeCount = Object.values(z.gateways).reduce((acc, gw) => acc + gw.nodes.length, 0);
+                const eco = z.economy || { yield_per_node: 0, price_per_kg: 0, loss_rate: 0 };
+                z.computedProfit = (eco.yield_per_node * nodeCount * eco.price_per_kg) * (1 - eco.loss_rate / 100);
+                totalFarmProfit += z.computedProfit;
+            });
+
+            Object.values(zoneMap).forEach(zone => {
+                const currentStage = getCurrentStage(zone.schedule || {});
+                const share = totalFarmProfit > 0 ? ((zone.computedProfit / totalFarmProfit) * 100).toFixed(1) : 0;
+                const zoneRecipeLabel = `${zone.crop || 'none'}.${currentStage}`;
+
+                const zoneEl = createTreeItem({
+                    id: zone.id,
+                    type: 'ZONE',
+                    icon: '📦',
+                    label: `${zone.name || 'Zone ' + zone.id} (${zone.crop || 'none'})`,
+                    badge: `${currentStage.toUpperCase()} | ₩${zone.computedProfit.toLocaleString()} (${share}%)`,
+                    data: zone
+                });
+
+                const zoneChildrenContainer = zoneEl.querySelector('.tree-children');
+
+                // 게이트웨이 렌더링
+                Object.values(zone.gateways).forEach(gw => {
+                    const gwEl = createTreeItem({
+                        id: gw.id,
+                        type: 'GATEWAY',
+                        icon: '🌐',
+                        label: `Gateway ${gw.id}`,
+                        badge: `${gw.nodes.length} Nodes`,
+                        data: gw
+                    });
+                    zoneChildrenContainer.appendChild(gwEl);
+
+                    const gwChildrenContainer = gwEl.querySelector('.tree-children');
+                    // 노드 렌더링
+                    gw.nodes.forEach(node => {
+                        const nodeData = { ...node, zoneCrop: zone.crop || 'none', zoneSchedule: zone.schedule };
+                        // 상속된 작물에 현재 단계 표시 로직 추가 필요할 수 있음. 지금은 간단히 표시.
+                        const displayRecipe = node.recipe || `${zoneRecipeLabel} (Inherited)`;
+
+                        const nodeEl = createTreeItem({
+                            id: node.id,
+                            type: 'NODE',
+                            icon: '🟢',
+                            label: `Node ${node.id}`,
+                            badge: displayRecipe,
+                            data: nodeData
+                        });
+                        gwChildrenContainer.appendChild(nodeEl);
+                    });
+                });
+
+                VIEWPORT.appendChild(zoneEl);
+            });
+        }
+
+        function getCurrentStage(schedule) {
+            if (!schedule || Object.keys(schedule).length === 0) return "n/a";
+            const now = new Date();
+            const dates = Object.entries(schedule)
+                .map(([k, v]) => ({ key: k, date: new Date(v) }))
+                .sort((a, b) => b.date - a.date);
+            for (let d of dates) {
+                if (now >= d.date) return d.key;
+            }
+            return "sowing";
+        }
+
+        function createTreeItem({ id, type, icon, label, badge, data }) {
+            const item = document.createElement('div');
+            item.className = 'tree-item';
+            const dataStr = JSON.stringify(data).replace(/"/g, '&quot;');
+
+            item.innerHTML = `
+                <div class="tree-header" onclick="handleItemClick(event, this, '${type}', ${dataStr})">
+                    <span class="tree-toggle">▶</span>
+                    <span class="tree-icon">${icon}</span>
+                    <span class="tree-label">${label}</span>
+                    <span class="tree-badge">${badge}</span>
+                    <div class="tree-actions" style="margin-left: 10px; display: flex; gap: 5px;">
+                        ${type !== 'NODE' ? `<button data-tooltip="${type === 'ZONE' ? '게이트웨이 추가' : '노드 추가'}" onclick="handleAdd(event, '${type}', '${id}')" style="background:var(--primary); border:none; color:white; border-radius:4px; padding:2px 6px; cursor:pointer; font-size:10px">+</button>` : ''}
+                        <button data-tooltip="${type} 삭제" onclick="handleDelete(event, '${type}', '${id}')" style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 6px; cursor:pointer; font-size:10px">🗑️</button>
+                    </div>
+                </div>
+                <div class="tree-children"></div>
+            `;
+            return item;
+        }
+
+        function handleAdd(e, type, parentId) {
+            e.stopPropagation();
+            alert(`${parentId} 하위에 새로운 ${type === 'ZONE' ? 'GATEWAY' : 'NODE'}를 추가하는 기능을 구현 중입니다.`);
+            // 여기에 실제 JSON 수정 및 sync 로직 추가 예정
+        }
+
+        function handleDelete(e, type, id) {
+            e.stopPropagation();
+            if (confirm(`${type} ${id}를 삭제하시겠습니까?`)) {
+                alert(`${id} 삭제 요청됨.`);
+            }
+        }
+
+        function handleItemClick(e, header, type, data) {
+            e.stopPropagation();
+            const toggle = header.querySelector('.tree-toggle');
+            const children = header.nextElementSibling;
+            if (children && (children.children.length > 0 || type === 'GATEWAY')) {
+                toggle.classList.toggle('open');
+                children.classList.toggle('show');
+            }
+            document.querySelectorAll('.tree-header').forEach(h => h.classList.remove('active'));
+            header.classList.add('active');
+            showDetails(type, data);
+        }
+
+        function showDetails(type, data) {
+            const title = document.getElementById('drawerTitle');
+            const content = document.getElementById('drawerContent');
+            DRAWER.classList.add('open');
+            title.innerText = `${type} 정보 및 설정`;
+
+            if (type === 'ZONE') {
+                const currentStage = getCurrentStage(data.schedule || {});
+                const stagesHtml = Object.entries(data.schedule || {}).map(([k, v]) => {
+                    const isCurrent = k === currentStage;
+                    const highlightStyle = isCurrent ? 'border: 1px solid var(--accent); background: rgba(245, 158, 11, 0.1);' : '';
+                    const labelStyle = isCurrent ? 'color: var(--accent); font-weight: bold;' : 'color: var(--text-dim);';
+
+                    // 해당 단계의 레시피 정보 가져오기
+                    let recipeInfo = '';
+                    if (data.crop && cropCatalog[data.crop] && cropCatalog[data.crop][k]) {
+                        const r = cropCatalog[data.crop][k];
+                        recipeInfo = `<div style="font-size:0.7rem; color:#aaa; margin-top:4px">
+                            Temp: ${r.Temp?.min}~${r.Temp?.max}℃ | pH: ${r.pH?.min}~${r.pH?.max}
+                        </div>`;
+                    }
+
+                    return `
+                    <div style="margin-bottom:10px; padding: 10px; border-radius: 8px; ${highlightStyle}">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label style="font-size:0.75rem; ${labelStyle}">${k.toUpperCase()}${isCurrent ? ' (Current)' : ''}</label>
+                            <input type="date" value="${v}" style="padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; border-radius:6px; font-size:0.8rem;">
+                        </div>
+                        ${recipeInfo}
+                    </div>
+                `}).join('');
+
+                content.innerHTML = `
+                    <div class="detail-card">
+                        <div class="detail-title">📍 구역 기본 정보</div>
+                        <div class="detail-row"><span class="detail-label">구역명</span><span class="detail-value">${data.name || data.id}</span></div>
+                        <div style="margin-top:10px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">재배 작물</label>
+                            <select id="zone-crop-select" style="width:100%; padding:10px; background:#1e293b; border:1px solid var(--primary); color:var(--primary); font-weight:600; border-radius:6px">
+                                ${Object.keys(cropCatalog).map(c => `<option value="${c}" ${data.crop === c ? 'selected' : ''}>${c.toUpperCase()}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <div class="detail-title">📅 재배 일정 (Life-cycle)</div>
+                        ${stagesHtml}
+                    </div>
+
+                    <div class="detail-card" style="border-left: 4px solid var(--accent)">
+                        <div class="detail-title">💰 예상 수익 계산기</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                            <div><label style="font-size:0.7rem; color:var(--text-dim)">생산량(kg)</label><input type="number" value="${data.economy?.yield_per_node || 0}" style="width:100%; padding:8px; background:transparent; border:1px solid var(--border); color:white"></div>
+                            <div><label style="font-size:0.7rem; color:var(--text-dim)">단가(원/kg)</label><input type="number" value="${data.economy?.price_per_kg || 0}" style="width:100%; padding:8px; background:transparent; border:1px solid var(--border); color:white"></div>
+                        </div>
+                        <div style="margin-top:10px">
+                            <label style="font-size:0.7rem; color:var(--text-dim)">손실율 (Loss %)</label>
+                            <input type="number" value="${data.economy?.loss_rate || 0}" style="width:100%; padding:8px; background:transparent; border:1px solid var(--border); color:white; border-radius:4px">
+                        </div>
+                        <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border)">
+                            <div style="display:flex; justify-content:space-between"><span>예상 순이익</span><span style="color:var(--primary); font-weight:700">₩ ${(data.computedProfit || 0).toLocaleString()}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="handleSaveAndClose('구역 정책', 'ZONE', '${data.id}')" style="width:100%; padding:12px; background:var(--primary); border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer">구역 정책 저장</button>
+                `;
+            } else if (type === 'GATEWAY') {
+                content.innerHTML = `
+                    <div class="detail-card">
+                        <div class="detail-title">🌐 게이트웨이 통신 설정</div>
+                        <div style="margin-bottom:15px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">MAC Address</label>
+                            <input type="text" value="${data.mac || '5C:CF:7F:XX:XX:XX'}" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--accent); font-family:monospace; border-radius:6px">
+                        </div>
+                        <div style="margin-bottom:15px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">WiFi SSID</label>
+                            <input type="text" value="${data.wifi_ssid || ''}" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; border-radius:6px">
+                        </div>
+                        <div style="margin-bottom:15px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">WiFi Password</label>
+                            <input type="password" value="${data.wifi_pw || ''}" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; border-radius:6px">
+                        </div>
+                        <div style="margin-bottom:15px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">MQTT Broker IP</label>
+                            <input type="text" value="${data.mqtt_broker || '192.168.0.XX'}" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--secondary); font-family:monospace; border-radius:6px">
+                        </div>
+                    </div>
+                    <button onclick="handleSaveAndClose('게이트웨이 설정')" style="width:100%; padding:12px; background:var(--secondary); border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer">게이트웨이 설정 적용</button>
+                `;
+            } else {
+                const sensors = data.sensors || [];
+                const actuators = data.actuators || [];
+                const today = new Date().toISOString().split('T')[0];
+                const currentStage = getCurrentStage(data.zoneSchedule) || "n/a";
+
+                content.innerHTML = `
+                    <div class="detail-card">
+                        <div class="detail-title">🛠️ Node Specification</div>
+                        <div class="detail-row"><span class="detail-label">Node ID</span><span class="detail-value">${data.id}</span></div>
+                        <div class="detail-row"><span class="detail-label">Today</span><span class="detail-value">${today}</span></div>
+                        <div class="detail-row"><span class="detail-label">Current Stage</span><span class="detail-value" style="color:var(--accent); font-weight:700">${currentStage.toUpperCase()}</span></div>
+                        <div class="detail-row"><span class="detail-label">Current Recipe</span><span class="detail-value" style="color:var(--primary); font-weight:700">${data.recipe || (data.zoneCrop + ' (상속)')}</span></div>
+                        <div style="margin-top:15px">
+                            <label style="font-size:0.75rem; color:var(--text-dim)">ESP-NOW MAC Address</label>
+                            <input type="text" value="${data.mac || ''}" placeholder="7C:DF:A1:XX:XX:XX" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--accent); font-family:monospace; border-radius:6px; margin-top:5px">
+                        </div>
+                    </div>
+
+                    <div class="detail-card" style="background:rgba(59, 130, 246, 0.1); border:1px solid var(--secondary)">
+                        <div class="detail-title" style="color:var(--secondary)">⚙️ 노드 상세 설정 (Node Config)</div>
+                        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:15px">이 노드에 연결된 센서나 장치를 추가/변경하거나, 핀 번호를 설정하려면 아래 버튼을 누르세요.</p>
+                        <button onclick="window.open('configurator.html?node=${data.id}', '_blank')" style="width:100%; padding:10px; background:var(--secondary); border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer">상세 설정 열기</button>
+                    </div>
+
+                    <div class="detail-title">📡 연결된 장치 현황</div>
+                    <div class="device-list">
+                        ${sensors.map((s, idx) => `
+                            <div class="device-item">
+                                <span class="icon">📡</span>
+                                <div class="info">
+                                    <div class="name">${s.name}</div>
+                                    <div class="meta">ID: ${s.id}</div>
+                                    <div class="meta" style="color:var(--accent)">Range: ${s.min} ~ ${s.max}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${actuators.map((a, idx) => `<div class="device-item"><span class="icon">⚙️</span><div class="info"><div class="name">${a.name}</div><div class="meta">ID: ${a.id}</div></div></div>`).join('')}
+                    </div>
+                    
+                    <button onclick="handleSaveAndClose('노드 통신 정보')" style="width:100%; padding:12px; background:var(--primary); border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; margin-top:20px">통신 설정 저장</button>
+                `;
+            }
+        }
+
+        function handleSaveAndClose(label, type, id) {
+            if (label === '구역 정책' && id) {
+                const zone = Object.values(zoneConfigs).find(z => z.id === id); // Find in raw zoneConfigs array/object
+                if (zone) {
+                    const cropSelect = document.getElementById('zone-crop-select');
+                    if (cropSelect) {
+                        zone.crop = cropSelect.value;
+                        // Re-render to show changes
+                        // Need to re-merge data because renderTree takes a map structure
+                        // For simplicity, let's reload the whole hierarchy or manually update the map passed to renderTree.
+                        // Since we have 'zoneConfigs' which is one of the sources for 'loadHierarchy', 
+                        // calling loadHierarchy() again would re-fetch from file, wiping changes unless we save to file.
+                        // So we must update the in-memory structure derived from zoneConfigs.
+
+                        // Ideally, we'd POST this change to the server. 
+                        // Here we'll simulate it by alerting and refreshing the tree with the local change.
+
+                        // Manually finding the zone in the map would be better if we had access to 'zoneMap' globally.
+                        // But 'zoneMap' is local to 'loadHierarchy'.
+                        // Let's modify 'loadHierarchy' to be split into 'fetchData' and 'buildTree'.
+                        // For now, let's just cheat and update the DOM or reload using local modified data? 
+                        // Actually, let's just accept that without a backend save, a page refresh clears this.
+                        // To make it "work" in the session, we need to update the data source that renderTree uses.
+
+                        // Let's refactor slightly to keep zoneMap global or re-derivable.
+                        // See next steps for refactoring. This replacement handles the button click better.
+                    }
+                }
+            }
+            alert(`${label}이 저장되었습니다. (실제 파일 저장 기능은 백엔드 연동 필요)`);
+
+            // For now, simple reload to see if it persists (it won't without backend). 
+            // BUT user said "changed but not applied".
+            // So we need to update the UI immediately.
+
+            // Let's trigger a re-build of the tree using the current (modified) variables.
+            // But we need to update the specific zone in 'zoneConfigs' first.
+            if (type === 'ZONE') {
+                const newCrop = document.getElementById('zone-crop-select').value;
+                const targetZone = zoneConfigs.find(z => z.id === id);
+                if (targetZone) targetZone.crop = newCrop;
+
+                // --- Threshold Update Logic Start ---
+                try {
+                    const currentStage = getCurrentStage(targetZone.schedule) || "growth"; // fallback
+                    if (cropCatalog[newCrop] && cropCatalog[newCrop][currentStage]) {
+                        const recipe = cropCatalog[newCrop][currentStage];
+
+                        // Update ALL nodes under this zone that inherit the crop
+                        fullConfig.forEach(node => {
+                            // Check if node belongs to this zone (first 2 chars of ID)
+                            if (node.id.startsWith(id)) {
+                                // Only update if node doesn't have a specific override recipe
+                                if (!node.recipe) {
+                                    if (node.sensors) {
+                                        node.sensors.forEach(sensor => {
+                                            // Match sensor name with recipe param key (case-insensitive for safety)
+                                            // Crop keys: "Temp", "pH", etc. Sensor names: likely "Temp", "pH"
+                                            const key = Object.keys(recipe).find(k => k.toLowerCase() === sensor.name.toLowerCase());
+                                            if (key) {
+                                                sensor.min = recipe[key].min;
+                                                sensor.max = recipe[key].max;
+                                                // Mark change for visual confirmation
+                                                console.log(`Updated Node ${node.id} Sensor ${sensor.name} -> [${sensor.min}, ${sensor.max}]`);
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                        alert(`구역 ${id}의 작물이 '${newCrop}'(으)로 변경되었습니다.\n임계값이 노드 ${fullConfig.filter(n => n.id.startsWith(id)).length}개에 전파되었습니다.`);
+                    }
+                } catch (e) {
+                    console.error("Threshold update failed", e);
+                }
+                // --- Threshold Update Logic End ---
+
+                // Re-build map and render switch logic remains same
+                const zoneMap = {};
+                zoneConfigs.forEach(z => { zoneMap[z.id] = { ...z, gateways: {} }; });
+                gatewayConfigs.forEach(gw => {
+                    const zoneId = gw.id.substring(0, 2);
+                    if (zoneMap[zoneId]) zoneMap[zoneId].gateways[gw.id] = { ...gw, nodes: [] };
+                });
+                fullConfig.forEach(node => {
+                    const zoneId = node.id.substring(0, 2);
+                    const gwId = node.id.substring(0, 2);
+                    if (zoneMap[zoneId]) {
+                        if (!zoneMap[zoneId].gateways[gwId]) zoneMap[zoneId].gateways[gwId] = { id: gwId, name: `GW-${gwId}`, nodes: [] };
+                        zoneMap[zoneId].gateways[gwId].nodes.push(node);
+                    }
+                });
+                renderTree(zoneMap);
+            }
+
+            closeDrawer();
+        }
+
+        function closeDrawer() {
+            DRAWER.classList.remove('open');
+            document.querySelectorAll('.tree-header').forEach(h => h.classList.remove('active'));
+        }
+
+        loadHierarchy();
+    </script>
+</body>
+
+</html>

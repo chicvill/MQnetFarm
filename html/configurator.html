@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm | Device Configurator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10B981;
+            --secondary: #3B82F6;
+            --bg: #0F172A;
+            --sidebar-bg: #1E293B;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #F8FAFC;
+            --text-dim: #94A3B8;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --glass-blur: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1E293B, #0F172A);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header .toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* --- Buttons & Inputs --- */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        select,
+        input {
+            background: #1E293B;
+            border: 1px solid var(--border);
+            padding: 0.8rem;
+            border-radius: 10px;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        /* --- Layout --- */
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            padding: 2rem;
+            flex-grow: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .editor-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Cards --- */
+        .config-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s;
+        }
+
+        .config-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-main);
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .pin-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        /* --- Node List Item --- */
+        .node-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .node-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .node-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--primary);
+        }
+
+        .node-item .id {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .node-item .meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid var(--border);
+        }
+
+        #json-output {
+            background: #000;
+            color: #10B981;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1><a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 1.5rem;"
+                title="메인으로 이동">🏠</a><span>🌱</span> 장치 설정 (Configurator)</h1>
+        <div class="toolbar">
+            <button class="btn" onclick="document.getElementById('file-input').click()">📂 설정 불러오기</button>
+            <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+
+            <button class="btn btn-primary" onclick="promptNewNode()">+ 노드 추가</button>
+            <button class="btn btn-secondary" onclick="downloadConfig()">💾 파일 저장</button>
+            <button class="btn" onclick="copyJson()">📋 JSON 복사</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3 class="section-title">운용 중인 노드 목록</h3>
+            <div id="node-list">
+                <!-- Node items -->
+            </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-panel">
+            <div id="empty-state" style="text-align: center; padding: 5rem; color: var(--text-dim);">
+                <div style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;">📡</div>
+                <p>목록에서 노드를 선택하여 설정을 변경하세요.</p>
+            </div>
+
+            <div id="editor-content" style="display: none;">
+                <div class="section-title">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-size: 1.5rem;">📦</span>
+                        <input type="text" id="node-id-display"
+                            style="background:transparent; border:none; padding:0; font-size: 1.8rem; font-weight: 800; color:var(--primary); width: 120px;">
+                    </div>
+                    <div id="node-context-info"
+                        style="margin-left:auto; text-align:right; font-size:0.8rem; color:var(--text-dim); display:flex; flex-direction:column;">
+                        <!-- Date/Stage injected here -->
+                    </div>
+                    <button class="btn btn-danger" style="margin-left: 20px;" onclick="deleteNode(activeNodeIndex)">노드
+                        삭제 (Delete)</button>
+                </div>
+
+                <!-- Sensors -->
+                <div class="section-title"
+                    style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                    <span>🌡️ 센서 설정 (Input)</span>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;"
+                        onclick="addSensor()">+ 센서 추가</button>
+                </div>
+                <div id="sensor-list"></div>
+
+                <!-- Actuators -->
+                <div class="section-title"
+                    style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                    <span>⚙️ 구동기 설정 (Output)</span>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;"
+                        onclick="addActuator()">+ 구동기 추가</button>
+                </div>
+                <div id="actuator-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <h3 class="section-title">📄 JSON Preview</h3>
+        <pre id="json-output">// No data</pre>
+    </div>
+
+    <script>
+        let nodes = [];
+        let zoneConfigs = [];
+        let catalog = {
+            sensors: [],
+            actuators: []
+        };
+        let activeNodeIndex = -1;
+
+        async function loadZoneConfigs() {
+            try {
+                const response = await fetch('/data/zone_config.json');
+                if (response.ok) { zoneConfigs = await response.json(); }
+            } catch (e) { console.warn("Zone config load failed"); }
+        }
+
+        async function loadCatalog() {
+            try {
+                const response = await fetch('/data/catalog_device.json');
+                if (response.ok) { catalog = await response.json(); }
+            } catch (e) { console.warn("Catalog load failed"); }
+        }
+
+        async function loadExistingConfig() {
+            try {
+                const response = await fetch('/data/config.json');
+                if (response.ok) {
+                    nodes = await response.json();
+                    renderNodeList();
+                    if (nodes.length > 0) setActiveNode(0);
+                    return true;
+                }
+            } catch (e) { }
+            return false;
+        }
+
+        function handleFileSelect(evt) {
+            const file = evt.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    nodes = JSON.parse(e.target.result);
+                    renderNodeList();
+                    if (nodes.length > 0) setActiveNode(0);
+                } catch (err) { alert("JSON Error"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderNodeList() {
+            const list = document.getElementById('node-list');
+            list.innerHTML = nodes.map((n, i) => `
+                <div class="node-item ${i === activeNodeIndex ? 'active' : ''}" onclick="setActiveNode(${i})">
+                    <div class="id">${n.id}</div>
+                    <div class="meta">${(n.sensors || []).length} Sensors / ${(n.actuators || []).length} Actuators</div>
+                </div>
+            `).join('');
+        }
+
+        function setActiveNode(index) {
+            activeNodeIndex = index;
+            renderNodeList();
+
+            if (index === -1) {
+                document.getElementById('empty-state').style.display = 'block';
+                document.getElementById('editor-content').style.display = 'none';
+                updateJsonOutput();
+                return;
+            }
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('editor-content').style.display = 'block';
+
+            const node = nodes[index];
+            document.getElementById('node-id-display').value = node.id;
+
+            // Context Info Update
+            const today = new Date().toISOString().split('T')[0];
+            let stageInfo = "Zone info not found";
+
+            if (node.id && node.id.length >= 2) {
+                const zoneId = node.id.substring(0, 2);
+                const zone = zoneConfigs.find(z => z.id === zoneId);
+                if (zone) {
+                    const stage = getCurrentStage(zone.schedule || {});
+                    stageInfo = `Zone: ${zone.name || zoneId} | Stage: <span style="color:var(--accent); font-weight:bold">${stage.toUpperCase()}</span>`;
+                }
+            }
+
+            document.getElementById('node-context-info').innerHTML = `
+                <span>Today: ${today}</span>
+                <span>${stageInfo}</span>
+            `;
+
+            renderSensors();
+            renderActuators();
+            updateJsonOutput();
+        }
+
+        function getCurrentStage(schedule) {
+            if (!schedule || Object.keys(schedule).length === 0) return "n/a";
+            const now = new Date();
+            const dates = Object.entries(schedule)
+                .map(([k, v]) => ({ key: k, date: new Date(v) }))
+                .sort((a, b) => b.date - a.date);
+            for (let d of dates) {
+                if (now >= d.date) return d.key;
+            }
+            return "sowing";
+        }
+
+        function updateNodeId(newId) {
+            if (activeNodeIndex === -1) return;
+            nodes[activeNodeIndex].id = newId.toUpperCase();
+            renderNodeList();
+            updateJsonOutput();
+        }
+
+        function promptNewNode() {
+            const id = prompt("새로운 노드 ID를 입력하세요 (예: AA01):");
+            if (id) {
+                nodes.push({ id: id.toUpperCase(), sensors: [], actuators: [] });
+                setActiveNode(nodes.length - 1);
+            }
+        }
+
+        function deleteNode(idx) {
+            if (confirm("정말로 이 노드를 삭제하시겠습니까?")) {
+                nodes.splice(idx, 1);
+                setActiveNode(nodes.length > 0 ? 0 : -1);
+            }
+        }
+
+        function getDevicePins(node) {
+            let pins = {
+                analog: ["GPIO0(ADC)", "GPIO1(ADC)", "GPIO2(ADC)", "GPIO3(ADC)", "GPIO4(ADC)"],
+                digital: ["GPIO5", "GPIO6", "GPIO7", "GPIO8", "GPIO9", "GPIO10", "GPIO11", "GPIO12", "GPIO13", "GPIO14", "GPIO15", "GPIO16"]
+            };
+            let sPins = [];
+            let aPins = [];
+            (node.sensors || []).forEach(s => sPins.push(pins[s.type]?.shift() || "No Pin"));
+            (node.actuators || []).forEach(a => aPins.push(pins[a.type]?.shift() || "No Pin"));
+            return { sPins, aPins };
+        }
+
+        function renderSensors() {
+            const list = document.getElementById('sensor-list');
+            const node = nodes[activeNodeIndex];
+            const { sPins } = getDevicePins(node);
+
+            list.innerHTML = (node.sensors || []).map((s, i) => `
+                <div class="config-card">
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 2; min-width: 200px;">
+                            <label>Device Catalog</label>
+                            <select onchange="onDeviceSelect('sensors', ${i}, this.value)" style="width: 100%;">
+                                <option value="">-- Select --</option>
+                                ${catalog.sensors.map(c => `<option value="${c.name}" ${c.name === s.name ? 'selected' : ''}>${c.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="input-group" style="flex: 2; min-width: 200px;">
+                            <label>ID & Pin</label>
+                            <div style="display:flex; align-items:center; gap:8px">
+                                <input type="text" value="${s.id}" oninput="updateDevice('sensors', ${i}, 'id', this.value)" style="flex:1; padding:0.5rem">
+                                <span class="pin-badge">${sPins[i]}</span>
+                            </div>
+                        </div>
+                        <div class="input-group" style="flex: 0 0 80px;">
+                            <label>Min</label>
+                            <input type="number" value="${s.min}" oninput="updateDevice('sensors', ${i}, 'min', Number(this.value))" style="width: 100%;">
+                        </div>
+                        <div class="input-group" style="flex: 0 0 80px;">
+                            <label>Max</label>
+                            <input type="number" value="${s.max}" oninput="updateDevice('sensors', ${i}, 'max', Number(this.value))" style="width: 100%;">
+                        </div>
+                        <div class="input-group" style="margin-left: auto;">
+                            <button class="btn-danger" style="padding: 0.8rem 1rem;" onclick="deleteDevice('sensors', ${i})">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderActuators() {
+            const list = document.getElementById('actuator-list');
+            const node = nodes[activeNodeIndex];
+            const { aPins } = getDevicePins(node);
+
+            list.innerHTML = (node.actuators || []).map((a, i) => `
+                <div class="config-card">
+                    <div class="grid-row">
+                        <div class="input-group">
+                            <label>Device Catalog</label>
+                            <select onchange="onDeviceSelect('actuators', ${i}, this.value)">
+                                <option value="">-- Select --</option>
+                                ${catalog.actuators.map(c => `<option value="${c.name}" ${c.name === a.name ? 'selected' : ''}>${c.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>ID & Pin</label>
+                            <div style="display:flex; align-items:center; gap:8px">
+                                <input type="text" value="${a.id}" oninput="updateDevice('actuators', ${i}, 'id', this.value)" style="flex:1; padding:0.5rem">
+                                <span class="pin-badge">${aPins[i]}</span>
+                            </div>
+                        </div>
+                        <button class="btn-danger" style="margin-top:20px; padding:5px" onclick="deleteDevice('actuators', ${i})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function onDeviceSelect(type, idx, name) {
+            const item = catalog[type].find(c => c.name === name);
+            if (item) {
+                nodes[activeNodeIndex][type][idx] = { ...nodes[activeNodeIndex][type][idx], ...item };
+                setActiveNode(activeNodeIndex);
+            }
+        }
+
+        function updateDevice(type, idx, key, val) {
+            nodes[activeNodeIndex][type][idx][key] = val;
+            updateJsonOutput();
+        }
+
+        function addSensor() { nodes[activeNodeIndex].sensors.push({ id: nodes[activeNodeIndex].id + '00' + (nodes[activeNodeIndex].sensors.length + 1), name: '', type: 'analog', min: 0, max: 100 }); renderSensors(); updateJsonOutput(); }
+        function addActuator() { nodes[activeNodeIndex].actuators.push({ id: nodes[activeNodeIndex].id + '10' + (nodes[activeNodeIndex].actuators.length + 1), name: '', type: 'digital' }); renderActuators(); updateJsonOutput(); }
+
+        function deleteDevice(type, idx) { nodes[activeNodeIndex][type].splice(idx, 1); setActiveNode(activeNodeIndex); }
+
+        function updateNodeId(newId) {
+            if (activeNodeIndex === -1) return;
+            const oldId = nodes[activeNodeIndex].id;
+            const upId = newId.toUpperCase();
+            nodes[activeNodeIndex].id = upId;
+
+            // 하위 장치 ID 동기화 (기존 ID가 노드 ID로 시작하는 경우만)
+            if (nodes[activeNodeIndex].sensors) {
+                nodes[activeNodeIndex].sensors.forEach(s => {
+                    if (s.id.startsWith(oldId)) s.id = s.id.replace(oldId, upId);
+                });
+            }
+            if (nodes[activeNodeIndex].actuators) {
+                nodes[activeNodeIndex].actuators.forEach(a => {
+                    if (a.id.startsWith(oldId)) a.id = a.id.replace(oldId, upId);
+                });
+            }
+
+            renderNodeList();
+            updateJsonOutput();
+        }
+
+        function updateJsonOutput() { document.getElementById('json-output').textContent = JSON.stringify(nodes, null, 4); }
+        function copyJson() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert("Copied!")); }
+        function downloadConfig() {
+            const blob = new Blob([document.getElementById('json-output').textContent], { type: "application/json" });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `config.json`; a.click();
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('node-id-display').addEventListener('input', (e) => updateNodeId(e.target.value));
+
+            await loadCatalog();
+            await loadZoneConfigs();
+            await loadExistingConfig();
+
+            const params = new URLSearchParams(window.location.search);
+            const targetNodeId = params.get('node');
+            if (targetNodeId) {
+                const index = nodes.findIndex(n => n.id === targetNodeId);
+                if (index !== -1) { setActiveNode(index); }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

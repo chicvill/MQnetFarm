@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm Live Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --accent: #00d2ff;
+            --accent-green: #39ff14;
+            --accent-red: #ff3131;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            background: var(--card);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-container label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .node-select {
+            background: #1c2128;
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            font-size: 1rem;
+            min-width: 150px;
+            transition: all 0.3s;
+        }
+
+        .node-select:hover {
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+        }
+
+        .node-card.hidden {
+            display: none;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .node-card {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .node-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .node-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .device-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .device-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.8rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .device-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .device-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .device-value.active {
+            color: var(--accent-green);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .chart-container {
+            height: 150px;
+            margin-top: 1rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--card);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="header">
+        <a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 1.5rem;"
+            title="Go to Mission Control">🏠</a>
+        <h1>🌌 SmartFarm Live Monitoring</h1>
+        <div id="last-update" class="status-badge">대기 중...</div>
+    </div>
+
+    <div class="filter-container">
+        <label for="node-selector">📍 노드 선택:</label>
+        <select id="node-selector" class="node-select">
+            <option value="all">전체 보기</option>
+        </select>
+    </div>
+
+    <div class="dashboard-grid" id="node-grid">
+        <!-- Node cards will be injected here -->
+    </div>
+
+    <script>
+        const charts = {}; // Store chart instances
+        const historyData = {}; // Store history for sparklines
+
+        async function updateDashboard() {
+            const loader = document.getElementById('loader');
+            const lastUpdate = document.getElementById('last-update');
+
+            try {
+                const response = await fetch('/data/live_data.json?t=' + Date.now());
+                if (!response.ok) throw new Error("데이터 파일을 찾을 수 없습니다. (main_async.py가 실행 중인지 확인하세요)");
+                const data = await response.json();
+
+                lastUpdate.textContent = `Last Update: ${data.timestamp}`;
+                lastUpdate.style.background = 'rgba(0, 210, 255, 0.1)';
+                lastUpdate.style.color = 'var(--accent)';
+
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+
+                const grid = document.getElementById('node-grid');
+                const selector = document.getElementById('node-selector');
+                const selectedNode = selector.value;
+
+                for (const [nodeId, node] of Object.entries(data.nodes)) {
+                    // Update Dropdown
+                    if (!document.querySelector(`.node-opt-${nodeId}`)) {
+                        const opt = document.createElement('option');
+                        opt.value = nodeId;
+                        opt.className = `node-opt-${nodeId}`;
+                        opt.textContent = `Node ${nodeId}`;
+                        selector.appendChild(opt);
+                    }
+
+                    let card = document.getElementById(`card-${nodeId}`);
+                    if (!card) {
+                        card = createNodeCard(nodeId, node);
+                        grid.appendChild(card);
+                        initChart(nodeId);
+                    }
+
+                    // Filter Visibility
+                    if (selectedNode === 'all' || selectedNode === nodeId) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+
+                    updateNodeCard(nodeId, node);
+                }
+            } catch (e) {
+                console.error("Dashboard error:", e);
+                lastUpdate.textContent = "⚠️ 연결 오류: " + e.message;
+                lastUpdate.style.background = 'rgba(255, 49, 49, 0.1)';
+                lastUpdate.style.color = 'var(--accent-red)';
+
+                // 에러 발생 시에도 로딩 화면은 일정 시간 후 제거 (사용자가 에러 메시지를 볼 수 있게 함)
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }, 2000);
+            }
+        }
+
+        function createNodeCard(id, data) {
+            const div = document.createElement('div');
+            div.id = `card-${id}`;
+            div.className = 'node-card';
+            div.innerHTML = `
+                <div class="node-header">
+                    <span class="node-title">Node ${id}</span>
+                </div>
+                <div class="device-list" id="sensors-${id}"></div>
+                <div class="device-list" id="actuators-${id}" style="margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;"></div>
+                <div class="chart-container">
+                    <canvas id="chart-${id}"></canvas>
+                </div>
+            `;
+            return div;
+        }
+
+        function initChart(id) {
+            if (typeof Chart === 'undefined') {
+                console.error("Chart.js is not loaded.");
+                return;
+            }
+            const canvas = document.getElementById(`chart-${id}`);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            charts[id] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(20).fill(''),
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { display: false, min: 0, max: 100 },
+                        x: { display: false }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    elements: { line: { tension: 0.4 }, point: { radius: 0 } }
+                }
+            });
+            historyData[id] = {};
+        }
+
+        function updateNodeCard(id, node) {
+            const sensorContainer = document.getElementById(`sensors-${id}`);
+            const actuatorContainer = document.getElementById(`actuators-${id}`);
+
+            sensorContainer.innerHTML = node.sensors.map(s => `
+                <div class="device-item">
+                    <span class="device-label">${s.name} (${s.id})</span>
+                    <span class="device-value">${s.val}</span>
+                </div>
+            `).join('');
+
+            actuatorContainer.innerHTML = node.actuators.map(a => `
+                <div class="device-item">
+                    <span class="device-label">${a.name}</span>
+                    <span class="device-value ${a.state === 'ACTIVE' ? 'active' : ''}">${a.state || 'IDLE'}</span>
+                </div>
+            `).join('');
+
+            // Update Chart
+            const chart = charts[id];
+            if (!chart) return;
+
+            node.sensors.forEach((s, idx) => {
+                if (!historyData[id][s.id]) {
+                    historyData[id][s.id] = Array(20).fill(0);
+                    chart.data.datasets.push({
+                        label: s.name,
+                        data: historyData[id][s.id],
+                        borderColor: `hsl(${idx * 137.5}, 70%, 50%)`,
+                        borderWidth: 2,
+                        fill: false
+                    });
+                }
+                historyData[id][s.id].push(s.val);
+                historyData[id][s.id].shift();
+            });
+            chart.update('none');
+        }
+
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm | Infra & Economy Manager</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10B981;
+            --secondary: #3B82F6;
+            --bg: #0F172A;
+            --sidebar-bg: #1E293B;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #F8FAFC;
+            --text-dim: #94A3B8;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #F59E0B;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background-image: radial-gradient(circle at 0% 0%, #172554 0%, transparent 50%);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: 'Outfit';
+        }
+
+        .tree-container {
+            max-width: 850px;
+        }
+
+        .tree-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .tree-header:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .tree-header.active {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .tree-icon {
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .tree-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .tree-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tree-children {
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 1px dotted var(--border);
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .tree-children.show {
+            display: block;
+        }
+
+        .drawer {
+            width: 500px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            right: -500px;
+            top: 0;
+            transition: right 0.4s ease;
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+
+        .profit-preview {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px dashed var(--primary);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .profit-preview div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .timeline {
+            margin-top: 15px;
+            border-left: 2px solid var(--secondary);
+            padding-left: 15px;
+        }
+
+        .phase {
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .phase.current {
+            color: var(--primary);
+            font-weight: 600;
+            list-style: "👉 ";
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-content">
+        <h1>🏗️ Farm Infrastructure & Economy</h1>
+
+        <div class="stats-banner">
+            <div class="stat-card">
+                <div class="stat-label">Total Est. Profit (Season)</div>
+                <div class="stat-value" id="totalProfit">₩ 0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Operational Focus</div>
+                <div class="stat-value" style="color:var(--primary)">Efficiency Mode</div>
+            </div>
+        </div>
+
+        <div id="treeViewport" class="tree-container"></div>
+    </div>
+
+    <div id="sideDrawer" class="drawer">
+        <div class="drawer-header">
+            <h2 id="drawerTitle">Zone Configuration</h2>
+            <span style="cursor:pointer; font-size:1.5rem" onclick="closeDrawer()">&times;</span>
+        </div>
+        <div class="drawer-content" id="drawerContent">
+            <!-- Dynamic Form -->
+        </div>
+    </div>
+
+    <script>
+        let fullConfig = [];
+        let zoneConfig = [];
+        let cropCatalog = {};
+
+        async function init() {
+            const [nodes, zones, crops] = await Promise.all([
+                fetch('/config.json').then(r => r.json()),
+                fetch('/zone_config.json').then(r => r.json()),
+                fetch('/catalog_crop.json').then(r => r.json())
+            ]);
+            fullConfig = nodes;
+            zoneConfig = zones;
+            cropCatalog = crops;
+            calculateGlobalStats();
+            renderTree();
+        }
+
+        function calculateGlobalStats() {
+            let total = 0;
+            zoneConfig.forEach(z => {
+                const nodeCount = fullConfig.filter(n => n.id.startsWith(z.id)).length;
+                const eco = z.economy;
+                const gross = eco.yield_per_node * nodeCount * eco.price_per_kg;
+                z.computedProfit = gross * (1 - eco.loss_rate / 100);
+                total += z.computedProfit;
+            });
+            document.getElementById('totalProfit').innerText = `₩ ${total.toLocaleString()}`;
+            zoneConfig.total = total;
+        }
+
+        function getCurrentStage(schedule) {
+            const now = new Date();
+            const dates = Object.entries(schedule).map(([k, v]) => ({ key: k, date: new Date(v) })).sort((a, b) => b.date - a.date);
+            for (let d of dates) {
+                if (now >= d.date) return d.key;
+            }
+            return "sowing";
+        }
+
+        function renderTree() {
+            const viewport = document.getElementById('treeViewport');
+            viewport.innerHTML = '';
+
+            zoneConfig.forEach(zone => {
+                const currentStage = getCurrentStage(zone.schedule);
+                const share = ((zone.computedProfit / zoneConfig.total) * 100).toFixed(1);
+
+                const item = document.createElement('div');
+                item.className = 'tree-item';
+                item.innerHTML = `
+                    <div class="tree-header" onclick="toggleAndEdit(this, 'ZONE', '${zone.id}')">
+                        <span class="tree-icon">📦</span>
+                        <span class="tree-label">${zone.name} (${zone.crop}) [Stage: ${currentStage}]</span>
+                        <span class="tree-badge" style="background:var(--secondary)">₩${zone.computedProfit.toLocaleString()} (${share}%)</span>
+                    </div>
+                    <div class="tree-children" id="child-${zone.id}"></div>
+                `;
+                viewport.appendChild(item);
+
+                const children = item.querySelector('.tree-children');
+                fullConfig.filter(n => n.id.startsWith(zone.id)).forEach(node => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'tree-header';
+                    nodeEl.style.marginLeft = '20px';
+                    nodeEl.style.fontSize = '0.9rem';
+                    nodeEl.innerHTML = `
+                        <span class="tree-icon">🟢</span>
+                        <span class="tree-label">Node ${node.id}</span>
+                        <span class="tree-badge">${node.recipe}</span>
+                    `;
+                    nodeEl.onclick = (e) => { e.stopPropagation(); openNodeEdit(node); };
+                    children.appendChild(nodeEl);
+                });
+            });
+        }
+
+        function toggleAndEdit(header, type, id) {
+            const children = header.nextElementSibling;
+            children.classList.toggle('show');
+            if (type === 'ZONE') openZoneEdit(id);
+        }
+
+        function openZoneEdit(zoneId) {
+            const zone = zoneConfig.find(z => z.id === zoneId);
+            const drawer = document.getElementById('sideDrawer');
+            const content = document.getElementById('drawerContent');
+            drawer.classList.add('open');
+
+            const stagesHtml = Object.entries(zone.schedule).map(([k, v]) => `
+                <div class="input-group">
+                    <label>${k.toUpperCase()} Date</label>
+                    <input type="date" value="${v}" onchange="updateZoneData('${zoneId}', 'schedule', '${k}', this.value)">
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="detail-card">
+                    <div class="input-group">
+                        <label>Crop Type</label>
+                        <select onchange="updateZoneData('${zoneId}', 'crop', null, this.value)">
+                            ${Object.keys(cropCatalog).map(c => `<option value="${c}" ${zone.crop === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        </select>
+                    </div>
+                    ${stagesHtml}
+                </div>
+
+                <div class="detail-card" style="border-left: 4px solid var(--accent)">
+                    <div class="detail-title">Finance & Yield</div>
+                    <div class="input-group">
+                        <label>Est. Yield per Node (kg)</label>
+                        <input type="number" value="${zone.economy.yield_per_node}" onchange="updateZoneData('${zoneId}', 'economy', 'yield_per_node', this.value)">
+                    </div>
+                    <div class="input-group">
+                        <label>Market Price (₩/kg)</label>
+                        <input type="number" value="${zone.economy.price_per_kg}" onchange="updateZoneData('${zoneId}', 'economy', 'price_per_kg', this.value)">
+                    </div>
+                    <div class="input-group">
+                        <label>Loss Rate (%)</label>
+                        <input type="number" value="${zone.economy.loss_rate}" onchange="updateZoneData('${zoneId}', 'economy', 'loss_rate', this.value)">
+                    </div>
+                </div>
+
+                <div class="profit-preview">
+                    <div><span>Est. Profit:</span><span style="color:var(--primary); font-weight:700">₩ ${zone.computedProfit.toLocaleString()}</span></div>
+                    <div style="font-size:0.8rem"><span>Total Share:</span><span>${((zone.computedProfit / zoneConfig.total) * 100).toFixed(1)}%</span></div>
+                </div>
+
+                <button class="save-btn" onclick="saveAll()">Sync Changes to All Nodes</button>
+            `;
+        }
+
+        function updateZoneData(zoneId, category, key, value) {
+            const zone = zoneConfig.find(z => z.id === zoneId);
+            if (category === 'crop') zone.crop = value;
+            else if (key) zone[category][key] = value;
+
+            calculateGlobalStats();
+            renderTree();
+            openZoneEdit(zoneId); // Refresh UI
+        }
+
+        async function saveAll() {
+            alert("Zone policy applied to all underlying nodes. Data synced.");
+            // In a real env, this would send POST to update config.json and zone_config.json
+        }
+
+        function closeDrawer() { document.getElementById('sideDrawer').classList.remove('open'); }
+
+        init();
+    </script>
+</body>
+
+</html>

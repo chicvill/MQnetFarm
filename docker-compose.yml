@@ -1,0 +1,12 @@
+services:
+  mqnet-farm:
+    container_name: mqnet-farm-system
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Data persistence
+      - ./data:/app/data
+      # Hot-reload for HTML (Optional)
+      - ./html:/app/html
+    restart: unless-stopped
