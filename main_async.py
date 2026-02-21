@@ -93,9 +93,6 @@ def init_google_sheets():
         pass
     return False
 
-# 초기화 시도
-init_google_sheets()
-
 # Google Sheets 비동기 업데이트 래퍼
 async def async_update_gs(rows):
     if not GS_SHEET: return
@@ -105,6 +102,9 @@ async def async_update_gs(rows):
         print(f"[Google] {len(rows)}건 업데이트 완료.")
     except Exception as e:
         print(f"[Google] 업데이트 에러: {e}")
+
+# 초기화 시도
+init_google_sheets()
 
 def index_to_alpha(n):
     res = ""
