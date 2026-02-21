@@ -1,0 +1,16 @@
+[
+    {
+        "id": "AA",
+        "mac": "5C:CF:7F:11:22:33",
+        "wifi_ssid": "SmartFarm_Zone_A",
+        "wifi_pw": "farm1234!",
+        "mqtt_broker": "192.168.0.100"
+    },
+    {
+        "id": "AB",
+        "mac": "5C:CF:7F:44:55:66",
+        "wifi_ssid": "SmartFarm_Zone_B",
+        "wifi_pw": "farm1234!",
+        "mqtt_broker": "192.168.0.100"
+    }
+]

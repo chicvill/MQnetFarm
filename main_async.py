@@ -70,10 +70,10 @@ def init_google_sheets():
                 # 1. 시트 열기 시도
                 spreadsheet = GS_CLIENT.open(sheet_name)
                 GS_SHEET = spreadsheet.get_worksheet(0)
-                print(f"📗 [Google] '{sheet_name}' 시트 연결 성공. (Path: {cred_path})")
+                print(f"[Google] '{sheet_name}' 연결 성공. (Path: {cred_path})")
                 
-                # [NEW] 연결 성공 직후 부팅 로그 기록 (연결 확인용)
-                GS_SHEET.append_row([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "SYSTEM", "BOOT", "Server Started", "OK", "0"])
+                # [NEW] 비동기로 부팅 로그 기록
+                asyncio.create_task(async_update_gs([[datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "SYSTEM", "BOOT", "Server Started", "OK", "0"]]))
                 return True
             except gspread.exceptions.SpreadsheetNotFound:
                 # 2. 못 찾았을 경우, 권한이 있는 시트 목록 출력하여 가이드
@@ -95,6 +95,16 @@ def init_google_sheets():
 
 # 초기화 시도
 init_google_sheets()
+
+# Google Sheets 비동기 업데이트 래퍼
+async def async_update_gs(rows):
+    if not GS_SHEET: return
+    try:
+        # gspread는 동기 방식이므로 스레드에서 실행하여 이벤트 루프 방해 금지
+        await asyncio.to_thread(GS_SHEET.append_rows, rows)
+        print(f"[Google] {len(rows)}건 업데이트 완료.")
+    except Exception as e:
+        print(f"[Google] 업데이트 에러: {e}")
 
 def index_to_alpha(n):
     res = ""
@@ -541,8 +551,8 @@ async def main():
         interval = random.uniform(4, 6)
         all_tasks.append(node.run_forever(interval=interval))
 
-    # 2. 태스크 추가 (테스트를 위해 잠시 2분=120초로 변경)
-    all_tasks.append(tsdb_logger_task(interval=120))
+    # 2. 태스크 추가 (확인을 위해 1분=60초로 변경)
+    all_tasks.append(tsdb_logger_task(interval=60))
     all_tasks.append(web_server_task())
     all_tasks.append(dynamic_coordinator_task())
 
