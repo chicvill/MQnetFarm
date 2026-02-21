@@ -352,7 +352,7 @@
 
             node.sensors.forEach((s, idx) => {
                 if (!historyData[id][s.id]) {
-                    historyData[id][s.id] = Array(20).fill(0);
+                    historyData[id][s.id] = Array(12).fill(0);
                     chart.data.datasets.push({
                         label: s.name,
                         data: historyData[id][s.id],
@@ -362,7 +362,7 @@
                     });
                 }
                 historyData[id][s.id].push(s.val);
-                historyData[id][s.id].shift();
+                if (historyData[id][s.id].length > 12) historyData[id][s.id].shift();
             });
             chart.update('none');
         }

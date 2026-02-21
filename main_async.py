@@ -351,70 +351,62 @@ async def web_server_task():
                     self.send_error(400, "Missing 'date' parameter")
                     return
 
-                # 2. CSV 읽기 및 필터링
-                # 월별 파일명 유추 (YYYY-MM-DD -> tsdb_YYYY_MM.csv)
+                # 2. 데이터 수집 (CSV + Google Sheets)
                 ym_prefix = target_date[:7].replace('-', '_')
                 file_path = f"{DATA_DIR}/tsdb_{ym_prefix}.csv"
                 result_data = {"labels": [], "temp": [], "humi": []}
                 
+                # A. 로컬 CSV 시도
                 if os.path.exists(file_path):
-                    # Try multiple encodings
-                    encodings = ['utf-8-sig', 'utf-8', 'cp949', 'euc-kr']
+                    encodings = ['utf-8-sig', 'utf-8']
                     lines = []
-                    
                     for enc in encodings:
                         try:
                             with open(file_path, 'r', encoding=enc) as f:
                                 lines = f.readlines()
-                            break # Success
-                        except UnicodeDecodeError:
-                            continue
-                            
+                            break
+                        except: continue
                     if lines:
                         reader = csv.DictReader(lines)
-                        print(f"📖 [History API] {target_date} 조회 요청 (Encoding: {enc})")
-                        
-                        count = 0
                         for row in reader:
-                            # timestamp format: YYYY-MM-DD HH:MM:SS
                             ts = row.get('timestamp', '')
                             if ts.startswith(target_date):
-                                count += 1
-                                # 시간만 추출 (HH:MM)
-                                time_str = ts.split(' ')[1][:5]
-                                
-                                # 데이터 분류
-                                dev_name = row.get('device_name', '')
-                                val_str = row.get('value', '0')
-                                pin = row.get('pin', '')
-                                
-                                try:
-                                    val = float(val_str)
-                                except ValueError:
-                                    continue
-                                
-                                # 차트용 데이터 수집
-                                # AAD001(Temp) or Device Name contains '온도'
-                                if "온도" in dev_name or "Temp" in dev_name:
-                                    result_data["temp"].append({"t": time_str, "y": val})
-                                elif "습도" in dev_name or "Humi" in dev_name:
-                                    result_data["humi"].append({"t": time_str, "y": val})
-                        
-                        print(f"✅ [History API] {count}건의 데이터 검색됨. (Temp: {len(result_data['temp'])}, Humi: {len(result_data['humi'])})")
-                    else:
-                        print(f"⚠️ [History API] CSV 읽기 실패 (모든 인코딩 시도)")
-                else:
-                    print(f"⚠️ [History API] {file_path} 파일이 없습니다.")
-                
-                # 3. 시간순 정렬 및 병합 (간소화된 로직)
-                # 실제 그래프를 위해서는 라벨(시간)을 통일해야 하므로, 간단히 수집된 순서대로 반환하거나
-                # 프론트엔드에서 처리하도록 원본 데이터를 줌. 여기서는 간단히 반환.
-                
+                                t_str = ts.split(' ')[1][:5]
+                                dev = row.get('device_name', '')
+                                try: val = float(row.get('value', '0'))
+                                except: continue
+                                if "온도" in dev or "Temp" in dev:
+                                    result_data["temp"].append({"t": t_str, "y": val})
+                                elif "습도" in dev or "Humi" in dev:
+                                    result_data["humi"].append({"t": t_str, "y": val})
+
+                # B. Google Sheets 보충
+                if (not result_data["temp"] or not result_data["humi"]) and GS_SHEET:
+                    print(f"🌐 [API] Google Sheets에서 {target_date} 복구 시도...")
+                    try:
+                        all_rec = GS_SHEET.get_all_records()
+                        for row in all_rec:
+                            ts = str(row.get('timestamp', ''))
+                            if ts.startswith(target_date):
+                                t_str = ts.split(' ')[1][:5]
+                                dev = row.get('device_name', '')
+                                try: val = float(row.get('value', '0'))
+                                except: continue
+                                entry = {"t": t_str, "y": val}
+                                if ("온도" in dev or "Temp" in dev):
+                                    if not any(x['t'] == t_str for x in result_data["temp"]):
+                                        result_data["temp"].append(entry)
+                                elif ("습도" in dev or "Humi" in dev):
+                                    if not any(x['t'] == t_str for x in result_data["humi"]):
+                                        result_data["humi"].append(entry)
+                        result_data["temp"].sort(key=lambda x: x["t"])
+                        result_data["humi"].sort(key=lambda x: x["t"])
+                    except Exception as ge: print(f"⚠️ [API] GS Error: {ge}")
+
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps(result_data).encode('utf-8'))
-                
             except Exception as e:
                 print(f"API Error: {e}")
                 self.send_error(500, str(e))
