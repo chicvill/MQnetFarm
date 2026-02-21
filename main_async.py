@@ -448,20 +448,31 @@ async def web_server_task():
 
     # 현재 디렉토리를 서빙하는 핸들러 생성
     
-    while PORT < 8010:
+    server_started = False
+    max_tries = 10
+    retry_count = 0
+    
+    while retry_count < max_tries:
         try:
             # socketserver.TCPServer는 블로킹이므로 스레드에서 실행
-            # directory=os.getcwd()는 SimpleHTTPRequestHandler의 기능이므로 커스텀 클래스에서는 super().__init__에서 처리됨
-            # 하지만 다중 상속을 피하기 위해 partial 대신 직접 클래스 사용
-            
             # 파이썬 3.7+ ThreadingHTTPServer 권장되지만 호환성 위해 TCPServer 사용
             with socketserver.TCPServer(("", PORT), SmartFarmHandler) as httpd:
-                print(f"🌍 [{DATA_DIR}] 서버가 준비되었습니다: http://localhost:{PORT}/html/index.html")
+                print(f"🌍 [{DATA_DIR}] 서버가 가동되었습니다: http://localhost:{PORT}/html/index.html")
                 print(f"   ㄴ API 엔드포인트: http://localhost:{PORT}/api/history")
+                server_started = True
                 await asyncio.to_thread(httpd.serve_forever)
                 break
-        except OSError:
+        except OSError as e:
+            if 'PORT' in os.environ:
+                # Render와 같이 환경 변수로 포트가 지정된 경우, 해당 포트가 안 되면 즉시 에러
+                print(f"❌ 지정된 포트 {PORT}를 사용할 수 없습니다: {e}")
+                raise
+            print(f"⚠️ 포트 {PORT}가 이미 사용 중입니다. 다음 포트로 시도합니다...")
             PORT += 1
+            retry_count += 1
+    
+    if not server_started:
+        print("❌ 웹 서버를 시작할 수 없습니다.")
 
 async def dynamic_coordinator_task():
     """
