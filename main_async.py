@@ -5,13 +5,26 @@ import os
 import random
 import sys
 from datetime import datetime
-from sf_core import ESP32C3Node, SYSTEM_REGISTRY
+from sf_core import ESP32C3Node, SYSTEM_REGISTRY, set_data_dir
+
+# 🟢 Google Sheets Support
+try:
+    import gspread
+    from google.oauth2.service_account import Credentials
+    GS_ENABLED = True
+except ImportError:
+    GS_ENABLED = False
 
 # Add current directory to sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# 📂 데이터 폴더 설정 (환경 변수 또는 기본값)
+DATA_DIR = os.environ.get('DATA_DIR', 'data')
+set_data_dir(DATA_DIR)
+
 print(f"🔧 [System] Python Executable: {sys.executable}")
 print(f"🔧 [System] CWD: {os.getcwd()}")
+print(f"📂 [System] Using Data Directory: {DATA_DIR}")
 
 # Vision Analysis (Optional)
 try:
@@ -20,6 +33,68 @@ try:
 except ImportError as e:
     print(f"⚠️ [Vision] Vision Module Load Failed: {e}")
     vision_analysis = None
+
+# Google Sheets 전용 전역 객체
+GS_CLIENT = None
+GS_SHEET = None
+
+def init_google_sheets():
+    global GS_CLIENT, GS_SHEET
+    if not GS_ENABLED: return None
+    
+    sheet_name = os.environ.get('GS_SHEET_NAME', 'SmartFarm_Data')
+    
+    # Render Secret Files 및 로컬 경로 탐색
+    possible_paths = [
+        os.environ.get('GS_CRED_PATH', ''), 
+        'my_secret_key.json',           # 회피용 새 이름
+        'credentials.json',
+        '/etc/secrets/my_secret_key.json', # Render용 새 이름
+        '/etc/secrets/credentials.json'    # Render 기본 경로
+    ]
+    
+    cred_path = None
+    for p in possible_paths:
+        if p and os.path.exists(p):
+            cred_path = p
+            break
+    
+    if cred_path:
+        try:
+            scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+            creds = Credentials.from_service_account_file(cred_path, scopes=scopes)
+            GS_CLIENT = gspread.authorize(creds)
+            
+            # 로그: 접속 시도
+            try:
+                # 1. 시트 열기 시도
+                spreadsheet = GS_CLIENT.open(sheet_name)
+                GS_SHEET = spreadsheet.get_worksheet(0)
+                print(f"📗 [Google] '{sheet_name}' 시트 연결 성공. (Path: {cred_path})")
+                
+                # [NEW] 연결 성공 직후 부팅 로그 기록 (연결 확인용)
+                GS_SHEET.append_row([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "SYSTEM", "BOOT", "Server Started", "OK", "0"])
+                return True
+            except gspread.exceptions.SpreadsheetNotFound:
+                # 2. 못 찾았을 경우, 권한이 있는 시트 목록 출력하여 가이드
+                print(f"⚠️ [Google] '{sheet_name}' 시트를 찾을 수 없습니다.")
+                titles = [s.title for s in GS_CLIENT.openall()]
+                if titles:
+                    print(f"   ㄴ 현재 접근 가능한 시트: {titles}")
+                else:
+                    print(f"   ㄴ 접근 가능한 시트가 없습니다. 공유 설정을 다시 확인하세요 (Email: {creds.service_account_email})")
+            except Exception as e:
+                print(f"⚠️ [Google] 시트 접근 중 오류 발생: {e}")
+                
+        except Exception as e:
+            print(f"⚠️ [Google] 시트 인증 실패: {e}")
+    else:
+        # print("ℹ️ [Google] credentials.json 파일이 없어 시트 연동을 건너뜁니다.")
+        pass
+    return False
+
+# 초기화 시도
+init_google_sheets()
 
 def index_to_alpha(n):
     res = ""
@@ -32,18 +107,19 @@ async def tsdb_logger_task(interval=60):
     """
     주기적으로 모든 센서 데이터를 수집하여 CSV 파일에 시계열로 저장합니다.
     """
-    file_path = "data/smartfarm_tsdb.csv"
+    file_path = f"{DATA_DIR}/smartfarm_tsdb.csv"
     
     # 파일이 없으면 헤더 생성
     if not os.path.exists(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w', newline='', encoding='utf-8-sig') as f:
             writer = csv.writer(f)
             writer.writerow(["timestamp", "node_id", "device_id", "device_name", "value", "pin"])
 
     print(f"📈 [TSDB] 시계열 로깅 태스크 가동 (주기: {interval}초)")
     
-    # 실시간 데이터 공유를 위한 파일 경로 (data 폴더)
-    live_data_path = "data/live_data.json"
+    # 실시간 데이터 공유를 위한 파일 경로
+    live_data_path = f"{DATA_DIR}/live_data.json"
 
     while True:
         try:
@@ -72,24 +148,44 @@ async def tsdb_logger_task(interval=60):
                 json.dump({"timestamp": timestamp, "nodes": live_status}, f, ensure_ascii=False, indent=2)
             os.replace(live_data_path + ".tmp", live_data_path)
 
-            # 2. 60초마다 CSV 누적 (간단한 카운터 사용)
-            # 여기서는 편의상 매 루프(2초)마다 live_data를 쓰지만 CSV는 interval에 따름
-            # 수정: interval을 2초로 잡고, CSV 저장은 별도 카운터로 처리
+            # 2. 10분(600초)마다 CSV 및 Google 시트 누적
             if not hasattr(tsdb_logger_task, '_csv_counter'):
                 tsdb_logger_task._csv_counter = 0
             
-            tsdb_logger_task._csv_counter += 2
+            tsdb_logger_task._csv_counter += 2 # 2초 주기
             if tsdb_logger_task._csv_counter >= interval:
                 tsdb_logger_task._csv_counter = 0
+                
+                # 월별 파일명 생성 (예: data/tsdb_2026_02.csv)
+                now = datetime.now()
+                monthly_file = f"{DATA_DIR}/tsdb_{now.strftime('%Y_%m')}.csv"
+                
+                # 파일이 없으면 헤더 생성
+                if not os.path.exists(monthly_file):
+                    os.makedirs(os.path.dirname(monthly_file), exist_ok=True)
+                    with open(monthly_file, 'w', newline='', encoding='utf-8-sig') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(["timestamp", "node_id", "device_id", "device_name", "value", "pin"])
+
                 for node_id, node_data in live_status.items():
                     for s in node_data["sensors"]:
                         log_entries.append([timestamp, node_id, s['id'], s['name'], s['val'], s['pin']])
                 
                 if log_entries:
-                    with open(file_path, 'a', newline='', encoding='utf-8-sig') as f:
+                    # A. 로컬 CSV 저장
+                    with open(monthly_file, 'a', newline='', encoding='utf-8-sig') as f:
                         writer = csv.writer(f)
                         writer.writerows(log_entries)
-                    print(f"📊 [TSDB] {timestamp} 이력 데이터 저장 완료.")
+                    
+                    # B. Google Sheets 저장 (비동기로 실행하거나 간단히 처리)
+                    if GS_SHEET:
+                        try:
+                            GS_SHEET.append_rows(log_entries)
+                            print(f"� [Google] {len(log_entries)}건 시트 업데이트 완료.")
+                        except Exception as e:
+                            print(f"⚠️ [Google] 시트 쓰기 실패: {e}")
+                            
+                    print(f"�📊 [TSDB] {timestamp} 이력 데이터 저장 완료 ({monthly_file})")
             
         except Exception as e:
             print(f"⚠️ [TSDB/Live Error] {e}")
@@ -106,7 +202,7 @@ async def web_server_task():
     import socketserver
     import urllib.parse
     
-    PORT = 8000
+    PORT = int(os.environ.get('PORT', 8000))
 
     class SmartFarmHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
@@ -127,6 +223,14 @@ async def web_server_task():
             else:
                 # 기본 정적 파일 제공
                 super().do_GET()
+
+        def translate_path(self, path):
+            # /data/ 요청을 실제 DATA_DIR 폴더로 매핑
+            if path.startswith('/data/'):
+                rel_path = path[len('/data/'):]
+                new_path = os.path.join(os.getcwd(), DATA_DIR, rel_path)
+                return new_path
+            return super().translate_path(path)
 
         def do_POST(self):
             # API 요청 처리 (POST)
@@ -156,7 +260,7 @@ async def web_server_task():
                         
                         # [NEW] 분석 결과 파일 저장
                         if result.get('success'):
-                            log_file = "data/growth_log.json"
+                            log_file = f"{DATA_DIR}/growth_log.json"
                             logs = []
                             if os.path.exists(log_file):
                                 try:
@@ -198,7 +302,7 @@ async def web_server_task():
                 entry = json.loads(post_data.decode('utf-8'))
                 
                 # 2. 파일에 저장 (prepend)
-                file_path = "data/journal.json"
+                file_path = f"{DATA_DIR}/journal.json"
                 journals = []
                 
                 if os.path.exists(file_path):
@@ -234,7 +338,9 @@ async def web_server_task():
                     return
 
                 # 2. CSV 읽기 및 필터링
-                file_path = "data/smartfarm_tsdb.csv"
+                # 월별 파일명 유추 (YYYY-MM-DD -> tsdb_YYYY_MM.csv)
+                ym_prefix = target_date[:7].replace('-', '_')
+                file_path = f"{DATA_DIR}/tsdb_{ym_prefix}.csv"
                 result_data = {"labels": [], "temp": [], "humi": []}
                 
                 if os.path.exists(file_path):
@@ -301,7 +407,7 @@ async def web_server_task():
         
         def handle_journal_list(self):
             try:
-                file_path = "data/journal.json"
+                file_path = f"{DATA_DIR}/journal.json"
                 journals = []
                 if os.path.exists(file_path):
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -319,7 +425,7 @@ async def web_server_task():
         
         def handle_growth_list(self):
             try:
-                file_path = "data/growth_log.json"
+                file_path = f"{DATA_DIR}/growth_log.json"
                 logs = []
                 if os.path.exists(file_path):
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -344,7 +450,7 @@ async def web_server_task():
             
             # 파이썬 3.7+ ThreadingHTTPServer 권장되지만 호환성 위해 TCPServer 사용
             with socketserver.TCPServer(("", PORT), SmartFarmHandler) as httpd:
-                print(f"🌍 [WEB] 서버가 준비되었습니다: http://localhost:{PORT}/html/index.html")
+                print(f"🌍 [{DATA_DIR}] 서버가 준비되었습니다: http://localhost:{PORT}/html/index.html")
                 print(f"   ㄴ API 엔드포인트: http://localhost:{PORT}/api/history")
                 await asyncio.to_thread(httpd.serve_forever)
                 break
@@ -368,8 +474,8 @@ async def dynamic_coordinator_task():
             now = datetime.now()
             # 정해진 시간이거나 초기 실행인 경우
             if first_run or (now.hour in CHECK_HOURS and now.hour != last_run_hour):
-                # 1. 설정 로드 (data 폴더)
-                with open('data/zone_config.json', 'r', encoding='utf-8') as f:
+                # 1. 설정 로드
+                with open(f'{DATA_DIR}/zone_config.json', 'r', encoding='utf-8') as f:
                     zones = json.load(f)
                 
                 for zone in zones:
@@ -410,12 +516,12 @@ async def dynamic_coordinator_task():
         await asyncio.sleep(60)
 
 async def main():
-    # 1. 파일에서 설정 로드 (data 폴더)
+    # 1. 파일에서 설정 로드
     try:
-        with open('data/config.json', 'r', encoding='utf-8') as f:
+        with open(f'{DATA_DIR}/config.json', 'r', encoding='utf-8') as f:
             config_data = json.load(f)
     except FileNotFoundError:
-        print("data/config.json 파일을 찾을 수 없어 기본 시뮬레이션을 실행합니다.")
+        print(f"{DATA_DIR}/config.json 파일을 찾을 수 없어 기본 시뮬레이션을 실행합니다.")
         return
 
     all_tasks = []
@@ -435,8 +541,8 @@ async def main():
         interval = random.uniform(4, 6)
         all_tasks.append(node.run_forever(interval=interval))
 
-    # 2. 태스크 추가
-    all_tasks.append(tsdb_logger_task(interval=60))
+    # 2. 태스크 추가 (테스트를 위해 잠시 2분=120초로 변경)
+    all_tasks.append(tsdb_logger_task(interval=120))
     all_tasks.append(web_server_task())
     all_tasks.append(dynamic_coordinator_task())
 

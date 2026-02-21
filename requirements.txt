@@ -1,3 +1,6 @@
 opencv-python-headless
 numpy
 requests
+gspread
+google-auth
+python-dotenv

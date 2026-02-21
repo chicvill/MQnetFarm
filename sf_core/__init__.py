@@ -3,8 +3,14 @@ import random
 import json
 from abc import ABC, abstractmethod
 
-# 전역 노드 레지스트리
+# 전역 설정
 SYSTEM_REGISTRY = {}
+DATA_DIR = "data"
+
+def set_data_dir(path):
+    global DATA_DIR
+    DATA_DIR = path
+    print(f"📂 [sf_core] Data directory set to: {DATA_DIR}")
 
 class BaseDevice(ABC):
     def __init__(self, device_id, name, pin, io_type):
@@ -184,7 +190,8 @@ class ESP32C3Node:
         if not recipe_str: return
         
         try:
-            with open('data/catalog_crop.json', 'r', encoding='utf-8') as f:
+            catalog_path = f'{DATA_DIR}/catalog_crop.json'
+            with open(catalog_path, 'r', encoding='utf-8') as f:
                 all_recipes = json.load(f)
                 parts = recipe_str.split('.')
                 if len(parts) != 2: return

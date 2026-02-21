@@ -8,6 +8,11 @@ data/smartfarm_tsdb.csv
 data/growth_log.json
 data/journal.json
 
+# Credentials and Secrets
+credentials.json
+my_secret_key.json
+*.json.tmp
+
 # Environment
 .env
 venv/
