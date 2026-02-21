@@ -1,0 +1,134 @@
+{
+    "sensors": [
+        {
+            "name": "수온 센서",
+            "type": "analog",
+            "min": 18,
+            "max": 24,
+            "msg_id_min": "WATER_TEMP_LOW",
+            "msg_id_max": "WATER_TEMP_HIGH"
+        },
+        {
+            "name": "pH 센서",
+            "type": "analog",
+            "min": 5.5,
+            "max": 6.5,
+            "msg_id_min": "PH_LOW",
+            "msg_id_max": "PH_HIGH"
+        },
+        {
+            "name": "EC(전기전도도) 센서",
+            "type": "analog",
+            "min": 1.2,
+            "max": 2.0,
+            "msg_id_min": "EC_LOW",
+            "msg_id_max": "EC_HIGH"
+        },
+        {
+            "name": "DO(용존산소) 센서",
+            "type": "analog",
+            "min": 5.0,
+            "max": 10.0,
+            "msg_id_min": "DO_LOW",
+            "msg_id_max": "DO_HIGH"
+        },
+        {
+            "name": "수위 센서",
+            "type": "analog",
+            "min": 20,
+            "max": 80,
+            "msg_id_min": "LEVEL_LOW",
+            "msg_id_max": "LEVEL_HIGH"
+        },
+        {
+            "name": "온도 센서",
+            "type": "digital",
+            "min": 20,
+            "max": 28,
+            "msg_id_min": "TEMP_LOW",
+            "msg_id_max": "TEMP_HIGH"
+        },
+        {
+            "name": "습도 센서",
+            "type": "analog",
+            "min": 40,
+            "max": 70,
+            "msg_id_min": "HUMID_LOW",
+            "msg_id_max": "HUMID_HIGH"
+        },
+        {
+            "name": "CO2 센서",
+            "type": "analog",
+            "min": 400,
+            "max": 1200,
+            "msg_id_min": "CO2_LOW",
+            "msg_id_max": "CO2_HIGH"
+        },
+        {
+            "name": "조도(PPFD) 센서",
+            "type": "analog",
+            "min": 200,
+            "max": 800,
+            "msg_id_min": "LIGHT_LOW",
+            "msg_id_max": "LIGHT_HIGH"
+        },
+        {
+            "name": "양액탱크 레벨 센서",
+            "type": "analog",
+            "min": 10,
+            "max": 90,
+            "msg_id_min": "TANK_LOW",
+            "msg_id_max": "TANK_HIGH"
+        }
+    ],
+    "actuators": [
+        {
+            "name": "수중 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "에어 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "배수 밸브",
+            "type": "digital"
+        },
+        {
+            "name": "급수 밸브",
+            "type": "digital"
+        },
+        {
+            "name": "pH Up 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "pH Down 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "양액(A) 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "양액(B) 펌프",
+            "type": "digital"
+        },
+        {
+            "name": "히터",
+            "type": "digital"
+        },
+        {
+            "name": "냉각기",
+            "type": "digital"
+        },
+        {
+            "name": "LED 성장등",
+            "type": "digital"
+        },
+        {
+            "name": "유동 팬",
+            "type": "digital"
+        }
+    ]
+}

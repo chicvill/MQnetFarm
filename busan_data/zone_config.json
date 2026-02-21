@@ -1,0 +1,34 @@
+[
+    {
+        "id": "AA",
+        "name": "제 1 온실",
+        "crop": "lettuce",
+        "schedule": {
+            "sowing": "2026-02-01",
+            "transplant": "2026-02-15",
+            "planting": "2026-03-01",
+            "harvest": "2026-03-20"
+        },
+        "economy": {
+            "yield_per_node": 150,
+            "price_per_kg": 3500,
+            "loss_rate": 5
+        }
+    },
+    {
+        "id": "AB",
+        "name": "제 2 온실",
+        "crop": "strawberry",
+        "schedule": {
+            "sowing": "2026-01-10",
+            "transplant": "2026-01-25",
+            "planting": "2026-02-10",
+            "harvest": "2026-04-15"
+        },
+        "economy": {
+            "yield_per_node": 200,
+            "price_per_kg": 12000,
+            "loss_rate": 10
+        }
+    }
+]

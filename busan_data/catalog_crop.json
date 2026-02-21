@@ -1,0 +1,124 @@
+{
+    "lettuce": {
+        "seedling": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.0
+            },
+            "EC": {
+                "min": 0.8,
+                "max": 1.2
+            },
+            "Temp": {
+                "min": 20.0,
+                "max": 25.0
+            }
+        },
+        "growth": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.5
+            },
+            "EC": {
+                "min": 1.2,
+                "max": 1.8
+            },
+            "Temp": {
+                "min": 20.0,
+                "max": 25.0
+            }
+        }
+    },
+    "strawberry": {
+        "vegetative": {
+            "pH": {
+                "min": 5.8,
+                "max": 6.2
+            },
+            "EC": {
+                "min": 1.2,
+                "max": 1.4
+            },
+            "Temp": {
+                "min": 15.0,
+                "max": 27.0
+            }
+        },
+        "fruiting": {
+            "pH": {
+                "min": 5.8,
+                "max": 6.2
+            },
+            "EC": {
+                "min": 1.4,
+                "max": 2.0
+            },
+            "Temp": {
+                "min": 15.0,
+                "max": 27.0
+            }
+        }
+    },
+    "tomato": {
+        "vegetative": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.5
+            },
+            "EC": {
+                "min": 2.0,
+                "max": 2.5
+            },
+            "Temp": {
+                "min": 18.0,
+                "max": 22.0
+            }
+        },
+        "fruiting": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.5
+            },
+            "EC": {
+                "min": 2.5,
+                "max": 3.5
+            },
+            "Temp": {
+                "min": 18.0,
+                "max": 22.0
+            }
+        }
+    },
+    "basil": {
+        "growth": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.5
+            },
+            "EC": {
+                "min": 1.0,
+                "max": 1.6
+            },
+            "Temp": {
+                "min": 20.0,
+                "max": 24.0
+            }
+        }
+    },
+    "cucumber": {
+        "growth": {
+            "pH": {
+                "min": 5.5,
+                "max": 6.0
+            },
+            "EC": {
+                "min": 1.7,
+                "max": 2.5
+            },
+            "Temp": {
+                "min": 20.0,
+                "max": 28.0
+            }
+        }
+    }
+}
