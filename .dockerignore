@@ -1,19 +1,15 @@
+# 기본적으로 제외할 항목
 .git
-.gitignore
-data/
-seoul_data/
-busan_data/
-docs/
 __pycache__/
-*.csv
-*.json
-!config.json
-!catalog_device.json
-!zone_config.json
-!recipe_config.json
-!my_secret_key.json
 node_modules/
-.dockerignore
-Dockerfile
+
+# 로그 및 임시 데이터 제외 (빌드 속도 저하 방지)
+**/*.csv
+**/*.tmp
+
+# 문서 및 기타 비실행 파일 제외
+docs/
 ARCHITECTURE.md
 README.md
+
+# 설정 파일들은 폴더째로 포함시키고 로그만 위에서 제외함
