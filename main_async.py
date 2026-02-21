@@ -239,9 +239,12 @@ async def web_server_task():
                 super().do_GET()
 
         def translate_path(self, path):
+            # URL에서 쿼리 스트링(?t=...) 제거 후 순수 경로만 추출
+            parsed_path = urllib.parse.urlparse(path).path
+            
             # /data/ 요청을 실제 DATA_DIR 폴더로 매핑
-            if path.startswith('/data/'):
-                rel_path = path[len('/data/'):]
+            if parsed_path.startswith('/data/'):
+                rel_path = parsed_path[len('/data/'):]
                 new_path = os.path.join(os.getcwd(), DATA_DIR, rel_path)
                 return new_path
             return super().translate_path(path)
