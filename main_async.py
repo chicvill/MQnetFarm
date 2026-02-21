@@ -558,8 +558,8 @@ async def main():
         interval = random.uniform(4, 6)
         all_tasks.append(node.run_forever(interval=interval))
 
-    # 2. 태스크 추가 (확인을 위해 1분=60초로 변경)
-    all_tasks.append(tsdb_logger_task(interval=60))
+    # 2. 태스크 추가 (5분=300초 간격으로 로그 기록)
+    all_tasks.append(tsdb_logger_task(interval=300))
     all_tasks.append(web_server_task())
     all_tasks.append(dynamic_coordinator_task())
 
