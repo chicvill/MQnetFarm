@@ -20,6 +20,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # 📂 데이터 폴더 설정 (환경 변수 또는 기본값)
 DATA_DIR = os.environ.get('DATA_DIR', 'data')
+
+# 오타 방지용 보정: busan-data -> busan_data
+if DATA_DIR == 'busan-data' and not os.path.exists('busan-data') and os.path.exists('busan_data'):
+    DATA_DIR = 'busan_data'
+
 set_data_dir(DATA_DIR)
 
 print(f"🔧 [System] Python Executable: {sys.executable}")
@@ -103,8 +108,7 @@ async def async_update_gs(rows):
     except Exception as e:
         print(f"[Google] 업데이트 에러: {e}")
 
-# 초기화 시도
-init_google_sheets()
+# 초기화 함수 정의 (호출은 main에서 수행)
 
 def index_to_alpha(n):
     res = ""
@@ -526,6 +530,9 @@ async def dynamic_coordinator_task():
         await asyncio.sleep(60)
 
 async def main():
+    # 0. Google Sheets 초기화 (이벤트 루프 시작 후 수행)
+    init_google_sheets()
+
     # 1. 파일에서 설정 로드
     try:
         with open(f'{DATA_DIR}/config.json', 'r', encoding='utf-8') as f:
