@@ -2,26 +2,46 @@
 chcp 65001 >nul
 title SmartFarm System Launcher
 echo =======================================================
-echo   🌌 SmartFarm Live 시스템 및 대시보드를 시작합니다...
+echo   🌌 SmartFarm Live 시스템 및 홍보 페이지를 시작합니다...
 echo =======================================================
 echo.
 
-:: 1. 필요한 라이브러리 설치 (최초 1회 필요)
-echo [0] 필요한 라이브러리 확인 및 설치 중...
-python -m pip install opencv-python numpy requests
+REM 1. 파이썬 실행 명령어 확인
+set PY_CMD=
+where py >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    set PY_CMD=py
+) else (
+    where python >nul 2>nul
+    if %ERRORLEVEL% equ 0 (
+        set PY_CMD=python
+    )
+)
 
-echo [1] Chrome 브라우저에서 대시보드를 여는 중...
-start chrome "http://localhost:8000/html/index.html"
+if "%PY_CMD%"=="" (
+    echo Python을 찾을 수 없습니다. 
+    echo Python이 설치되어 있고 PATH에 등록되어 있는지 확인하세요.
+    pause
+    exit /b 1
+)
 
-echo [2] 데이터 서버 및 시뮬레이션 기동 중...
-echo (종료하려면 이 창에서 Ctrl+C를 누르세요.)
+set PORT=8007
+
+echo [0] 파이썬 버전 확인: %PY_CMD%
+echo [1] 필수 라이브러리 확인 및 설치 중...
+"%PY_CMD%" -m pip install opencv-python numpy requests >nul 2>nul
+
+echo [2] Chrome 브라우저에서 홈페이지를 여는 중...
+echo     접속 주소: http://localhost:%PORT%
+start chrome "http://localhost:%PORT%"
+
+echo [3] 스마트팜 데이터 서버 기동 중...
 echo.
 
-python main_async.py
+"%PY_CMD%" main_async.py
 
-:: 만약 에러로 인해 종료된 경우 창이 바로 닫히지 않도록 함
 if %ERRORLEVEL% neq 0 (
     echo.
-    echo ⚠️ 프로그램이 예상치 못하게 종료되었습니다. (Error Code: %ERRORLEVEL%)
+    echo ⚠️ 프로그램이 종료되었습니다. (Error Code: %ERRORLEVEL%)
     pause
 )

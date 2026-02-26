@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQnetFarm | Home</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: auto;
+            height: 40px;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 4rem;
+            overflow-y: auto;
+            background: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.05) 0%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero {
+            text-align: center;
+            max-width: 900px;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.1);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .cta-container {
+            margin-top: 4rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            color: #fff;
+        }
+
+        .btn-outline:hover {
+            background: var(--border);
+        }
+
+        /* --- Instructions Animation --- */
+        .step-list {
+            margin-top: 15px;
+            list-style: none;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .step-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="logo"><span>MQ</span>net</div>
+        <a href="home.html" class="nav-item active">
+            <i data-lucide="home" class="nav-icon"></i>
+            <span class="nav-label">홈페이지 (Home)</span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero">
+            <h1>MQnet Smart Farm</h1>
+            <p>전 세계 어디서든 연결되는 클라우드 기반 지능형 스마트팜 솔루션.<br>하드웨어부터 클라우드까지, 완벽한 통합 환경을 구축하세요.</p>
+        </div>
+
+        <div class="grid">
+            <!-- Hardware 1 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="cpu"></i></div>
+                <h3>ESP32-S3 AI Gateway</h3>
+                <p>시스템의 통신 허브이자 AI 연산 장치입니다.</p>
+                <ul class="step-list">
+                    <li>16MB Flash / 8MB PSRAM 모델 권장</li>
+                    <li>S3-BOX 연동으로 음성 인식 및 로컬 AI 수행</li>
+                    <li>ESP-NOW 및 WiFi 다중 스택 지원</li>
+                </ul>
+            </div>
+
+            <!-- Hardware 2 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="microchip"></i></div>
+                <h3>ESP32-P & Nodes</h3>
+                <p>배터리 구동 및 데이터 수집을 위한 센서 노드입니다.</p>
+                <ul class="step-list">
+                    <li>Deep Sleep 최적화로 배터리 수명 연장</li>
+                    <li>초소형 PICO 모델을 활용한 소형 노드 구축</li>
+                    <li>Plug-and-Play 방식의 센서 등록 지원</li>
+                </ul>
+            </div>
+
+            <!-- Hardware 3 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="link"></i></div>
+                <h3>E-TW11 (EW11) Bridge</h3>
+                <p>산업용 장비를 클라우드로 연결하는 이더넷 브리지입니다.</p>
+                <ul class="step-list">
+                    <li>RS485/Modbus RTU to Web 프로토콜 변환</li>
+                    <li>고정 IP 및 터널링 모드 지원</li>
+                </ul>
+            </div>
+
+            <!-- Cloud 1 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="github"></i></div>
+                <h3>GitHub CI/CD</h3>
+                <p>소스 코드 관리 및 자동 배포 시스템입니다.</p>
+                <ul class="step-list">
+                    <li>Push 시 Render 클라우드와 자동 동기화</li>
+                    <li>Secret Management를 통한 API 키 보호</li>
+                </ul>
+            </div>
+
+            <!-- Cloud 2 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="box"></i></div>
+                <h3>Docker Container</h3>
+                <p>어디서든 동일하게 동작하는 가상화 실행 환경입니다.</p>
+                <ul class="step-list">
+                    <li>OpenCV 및 Python 라이브러리 일관성 보장</li>
+                    <li>docker-compose를 이용한 원클릭 환경 구축</li>
+                </ul>
+            </div>
+
+            <!-- Cloud 3 -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="cloud"></i></div>
+                <h3>Render Hosting</h3>
+                <p>전 세계 수백 개의 농장을 관리하는 서버 인스턴스입니다.</p>
+                <ul class="step-list">
+                    <li>싱가포르 등 글로벌 리전 서버 운영</li>
+                    <li>SSL 보안 인증서 및 전용 도메인 제공</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="cta-container">
+            <a href="index.html" class="btn btn-primary">
+                대시보드 시작하기 <i data-lucide="arrow-right"></i>
+            </a>
+            <a href="https://github.com/chicvill/MQnetFarm" class="btn btn-outline" target="_blank">
+                GitHub 소스 보기 <i data-lucide="external-link"></i>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

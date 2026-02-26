@@ -18,15 +18,33 @@ if not exist busan_data (
     xcopy data busan_data /E /I /H /Y
 )
 
-:: 2. 서울 농장 실행 (Port 8001 / DATA_DIR seoul_data)
+:: 2. 파이썬 실행 명령어 확인
+set PY_CMD=
+where py >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    set PY_CMD=py
+) else (
+    where python >nul 2>nul
+    if %ERRORLEVEL% equ 0 (
+        set PY_CMD=python
+    )
+)
+
+if "%PY_CMD%"=="" (
+    echo Python을 찾을 수 없습니다. 
+    pause
+    exit /b 1
+)
+
+:: 3. 서울 농장 실행 (Port 8001 / DATA_DIR seoul_data)
 echo [1/2] 서울 농장 시스템 기동 (Port: 8001)
-start "SEOUL FARM (8001)" cmd /c "set DATA_DIR=seoul_data&& set PORT=8001&& python main_async.py"
+start "SEOUL FARM (8001)" /d "%~dp0" cmd /c "set DATA_DIR=seoul_data&&set PORT=8001&&%PY_CMD% main_async.py || pause"
 
 timeout /t 2 /nobreak >nul
 
-:: 3. 부산 농장 실행 (Port 8002 / DATA_DIR busan_data)
+:: 4. 부산 농장 실행 (Port 8002 / DATA_DIR busan_data)
 echo [2/2] 부산 농장 시스템 기동 (Port: 8002)
-start "BUSAN FARM (8002)" cmd /c "set DATA_DIR=busan_data&& set PORT=8002&& python main_async.py"
+start "BUSAN FARM (8002)" /d "%~dp0" cmd /c "set DATA_DIR=busan_data&&set PORT=8002&&%PY_CMD% main_async.py || pause"
 
 echo.
 echo -------------------------------------------------------

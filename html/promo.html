@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQnet SmartFarm | 인공지능 클라우드 스마트팜</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --bg-dark: #050505;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --accent: #00ff9d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Navbar --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            padding: 0.8rem 1.8rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 1000px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        /* --- Features Section --- */
+        .features {
+            padding: 10rem 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 32px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--primary);
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 5rem 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            background: #000;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .copyright {
+            color: #444;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo"><span>MQ</span>net SmartFarm</div>
+        <div class="nav-links">
+            <a href="#features">솔루션</a>
+            <a href="#tech">기술스택</a>
+            <a href="help.html">고객지원</a>
+            <a href="index.html" class="cta-button">시스템 접속 (Console)</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>미래 농업의 기준,<br><span>AI 클라우드 스마트팜</span></h1>
+        <p>전 세계 어디서나 농장을 한눈에 관리하고 제어하세요. 최첨단 인공지능과 클라우드 아키텍처가 당신의 농업 생산성을 극대화합니다.</p>
+        <div style="display: flex; gap: 1.5rem;">
+            <a href="index.html" class="cta-button" style="padding: 1.2rem 3rem; font-size: 1.1rem;">지금 시작하기 (FREE)</a>
+            <a href="#features"
+                style="padding: 1.2rem 3rem; border: 1px solid rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 50px; font-weight: 700;">더
+                알아보기</a>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="brain"></i></div>
+            <h3>AI Vision 생육 분석</h3>
+            <p>특허받은 인공지능 알고리즘이 CCTV 영상만으로 식물의 성장 속도와 건강 상태를 정밀 분석합니다.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="cloud"></i></div>
+            <h3>글로벌 클라우드 제어</h3>
+            <p>GitHub과 Render 기반의 서버리스 환경으로 지구 반대편에서도 2초 이내의 빠른 제어 속도를 보장합니다.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="shield"></i></div>
+            <h3>재난 자동 방지 시스템</h3>
+            <p>화재, 침입, 태풍 등 이상 징후 감지 시 0.1초 이내에 자동 차단 및 알림을 전송하여 소중한 자산을 보호합니다.</p>
+        </div>
+    </section>
+
+    <footer>
+        <span class="footer-logo">MQnet <span>SmartFarm</span></span>
+        <div class="footer-links">
+            <a href="#">회사소개</a>
+            <a href="docs/USER_MANUAL.md">사용자 매뉴얼</a>
+            <a href="help.html">유지보수 가이드</a>
+            <a href="#">개인정보처리방침</a>
+        </div>
+        <p class="copyright">© 2026 MQnet Intelligence Agriculture Team. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

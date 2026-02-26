@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시스템 도움말 및 상세 가이드전문 (Support)</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.8);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 0.8rem;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: 80px;
+            padding: 3rem;
+            max-width: 1200px;
+            margin-right: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        button.download-btn {
+            background: linear-gradient(135deg, var(--secondary), #4f00b5);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(112, 0, 255, 0.3);
+            transition: transform 0.2s;
+        }
+
+        button.download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(112, 0, 255, 0.5);
+        }
+
+        /* --- Card Grid (Summary View) --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .card ul {
+            list-style: none;
+        }
+
+        .card li {
+            margin-bottom: 10px;
+            color: #fff;
+            position: relative;
+            padding-left: 20px;
+            font-size: 0.95rem;
+        }
+
+        .card li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* --- Detailed Documentation (Paper Style) --- */
+        .full-document {
+            background: white;
+            color: #111;
+            padding: 5rem;
+            border-radius: 32px;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8);
+            margin-bottom: 5rem;
+        }
+
+        .doc-header {
+            border-bottom: 4px solid #000;
+            padding-bottom: 1.5rem;
+            margin-bottom: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .doc-header h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #000;
+            letter-spacing: -1px;
+        }
+
+        .doc-header p {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .doc-section {
+            margin-bottom: 5rem;
+        }
+
+        .doc-section h3 {
+            font-size: 2rem;
+            border-left: 8px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+            color: #000;
+            font-weight: 800;
+        }
+
+        .doc-subsection {
+            margin-bottom: 3rem;
+        }
+
+        .doc-subsection h4 {
+            font-size: 1.4rem;
+            color: #000;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .doc-subsection p,
+        .doc-subsection li {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .doc-subsection ul {
+            padding-left: 2.5rem;
+            list-style: disc;
+        }
+
+        /* --- Scroll Animation --- */
+        .reveal {
+            transition: all 1s ease;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Print Styles (Critical for "상세 내용 없음" Fix) --- */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+
+            .sidebar,
+            .card-grid,
+            .download-btn,
+            header {
+                display: none !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+            }
+
+            .full-document {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .doc-section {
+                page-break-after: always;
+                padding-top: 20pt;
+            }
+
+            h2,
+            h3,
+            h4 {
+                page-break-after: avoid;
+            }
+
+            p,
+            li {
+                widows: 3;
+                orphans: 3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="logo">MQ</div>
+        <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i></a>
+        <a href="cctv.html" class="nav-item"><i data-lucide="camera"></i></a>
+        <a href="help.html" class="nav-item" style="color: var(--primary);"><i data-lucide="help-circle"></i></a>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>Support & Documentation</h1>
+                <p>MQnet SmartFarm 시스템 통합 운영 매뉴얼</p>
+            </div>
+            <button class="download-btn" onclick="window.print()">
+                <i data-lucide="file-text"></i> 상세 PDF 가이드 다운로드
+            </button>
+        </header>
+
+        <!-- Summary Cards (Quick View) -->
+        <section class="card-grid">
+            <div class="card">
+                <h2><i data-lucide="book-open"></i> 사용자 매뉴얼</h2>
+                <h3>핵심 기능을 한눈에</h3>
+                <p>대시보드 실시간 관제부터 AI 생육 분석까지, 사용자 필수 가이드입니다.</p>
+                <ul>
+                    <li>2초 주기 센서 데이터 실시간 새로고침</li>
+                    <li>CCTV 기반 AI 🌱 Vision 분석 가동</li>
+                    <li>영농 일지 기록 및 과거 통계 분석</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2><i data-lucide="cpu"></i> 하드웨어 아키텍처</h2>
+                <h3>시스템 고도화 명세</h3>
+                <p>글로벌 서버와 현장 장비(ESP32)간의 저지연 통신 구조 설계입니다.</p>
+                <ul>
+                    <li>MQTT 5.0 기반 초저지연 양방향 제어</li>
+                    <li>Docker 기반 100% 동일 환경 구축</li>
+                    <li>Google Docs 연동 클라우드 백업 시스템</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2><i data-lucide="activity"></i> 유지보수 및 조치</h2>
+                <h3>장애 대응 가이드</h3>
+                <p>시스템 문제 발생 시 전문가 수준의 빠른 대응을 지원합니다.</p>
+                <ul>
+                    <li>장치 오프라인 시 통신 노드 리셋 절차</li>
+                    <li>pH/EC 센서 성능 보정(Calibration) 주기</li>
+                    <li>네트워크 포트(8007) 방화벽 설정 확인</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- FULL DOCUMENTATION (The "Detailed Content" that the user wants) -->
+        <article class="full-document">
+            <div class="doc-header">
+                <h2>MQnet SmartFarm 공식 가이드 전문</h2>
+                <p>SmartFarm Live v1.2: 사용자 매뉴얼 및 글로벌 기술 명세서 통합본</p>
+            </div>
+
+            <!-- SECTION 1: USER MANUAL Content from USER_MANUAL.md -->
+            <section class="doc-section">
+                <h3>PART 1. 상세 사용자 운영 매뉴얼 (User Manual)</h3>
+
+                <div class="doc-subsection">
+                    <h4>1.1 시스템 아키텍처 및 개요</h4>
+                    <p>본 시스템은 데이터 수집(IoT), 영상 분석(AI Vision), 그리고 자동 제어(Automation)가 유기적으로 통합된 차세대 전문 농업 플랫폼입니다. 사용자는 별도의
+                        소프트웨어 설치 없이 웹 브라우저만으로 농장의 모든 환경을 실시간으로 감시하고 제어할 수 있습니다.</p>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>1.2 실시간 대시보드 관제 방법</h4>
+                    <p>메인 대시보드(index.html)에서는 농장의 핵심 데이터(온도, 습도, 수위, 영양액 상태 등)가 2초 주기로 자동 갱신됩니다. 만약 데이터가 설정된 범위를 벗어나면 수치
+                        타일이 점멸하며 경고를 발생시킵니다.</p>
+                    <ul>
+                        <li><strong>Live Monitoring</strong>: 각 구역(Zone)별 현재 상태 실시간 스트리밍.</li>
+                        <li><strong>Health Diagnostics</strong>: 장치의 통신 무결성(Heartbeat) 상시 체크.</li>
+                        <li><strong>Emergency Control</strong>: 화재, 태풍, 침입 시뮬레이션을 통한 안전 확인 서비스.</li>
+                    </ul>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>1.3 AI Vision 생육 분석 엔진 활용</h4>
+                    <p>CCTV 관제 탭에서 각 카메라 하단의 [🌱] 아이콘을 클릭하면 인공지능이 현재 작물의 상태를 즉시 분석합니다. 딥러닝 알고리즘이 잎사귀 영역을 추출하여 전체 면적 대비
+                        생장율(%)을 계산하며, 수확 적기 판단 데이터를 제공합니다.</p>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>1.4 스마트 영농 일지 및 빅데이터 분석</h4>
+                    <p>분석 탭(history.html)에서는 누적된 환경 데이터의 추이를 일별, 주별 그래프로 조회할 수 있습니다. 일지 작성 기능을 통해 수확량이나 방제 내역을 기록하면, AI가
+                        추후 최적의 재배 레시피 도출에 이를 반영합니다.</p>
+                </div>
+            </section>
+
+            <!-- SECTION 2: ARCHITECTURE Content from 세계어디든지연결.md -->
+            <section class="doc-section">
+                <h3>PART 2. 기술 아키텍처 및 하드웨어 명세 (Specs)</h3>
+
+                <div class="doc-subsection">
+                    <h4>2.1 클라우드 네이티브 인프라</h4>
+                    <p>안정적인 무중단 서비스를 위해 다음과 같은 클라우드 기술 스택을 사용합니다.</p>
+                    <ul>
+                        <li><strong>Docker 가상화</strong>: <code>Dockerfile</code>을 통해 Python 및 OpenCV 실행 환경을 하나의 레이어로
+                            캡슐화합니다. 로컬 PC와 싱가포르 Render 서버가 100% 동일한 환경에서 동작하도록 보장하여 환경 차이로 인한 오류를 원천 차단합니다. (명령어:
+                            <code>docker-compose up</code>)
+                        </li>
+                        <li><strong>GitHub Integration</strong>: 소스 코드 버전 관리와 동시에 자동 배포(CI/CD) 워크플로우를 가동합니다.</li>
+                        <li><strong>Render Hosting</strong>: 전 세계 주요 거점에 에지 서버를 배치하여 지연 없는 대쉬보드 서비스 제공.</li>
+                    </ul>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>2.2 실시간 데이터 전송 및 제어 기술</h4>
+                    <p>명령 하달에서 실제 장치 작동까지 평균 1초 이내의 빠른 응답을 실현합니다.</p>
+                    <p><strong>[Web Request (HTTPS/JSON)]</strong> → <strong>[Python Async Engine]</strong> →
+                        <strong>[Global MQTT Broker]</strong> → <strong>[Field Gateway (ESP32)]</strong> 순으로 패킷이 전달되어 전
+                        세계 어디서든 즉각적인 물리 제어가 가능합니다.
+                    </p>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>2.3 하드웨어 리스트 및 구성 요소</h4>
+                    <ul>
+                        <li><strong>ESP32-S3 (AI Gateway)</strong>: 듀얼 코어 고성능 프로세서로 현장 영상 처리 및 데이터 중개 담당.</li>
+                        <li><strong>ESP32-C3/P (Mini Sensor Node)</strong>: 초소형/저전력 설계로 작물 하단부에 배치되어 미세 환경 데이터 수집.</li>
+                        <li><strong>Industrial Modbus Bridge</strong>: 산업용 펌프나 밸브를 디지털 네트워크로 전환하는 통신 인터페이스.</li>
+                    </ul>
+                </div>
+
+                <div class="doc-subsection">
+                    <h4>2.4 데이터 백업 및 보안 무결성</h4>
+                    <p>데이터 유실 방지를 위해 모든 기록은 로컬 CSV 파일 형식으로 1시간 단위 스냅샷이 생성되며, 동시의 Google Cloud(Sheets API)를 통해 클라우드에 영구
+                        저장됩니다.</p>
+                </div>
+            </section>
+
+            <div
+                style="margin-top: 5rem; text-align: center; border-top: 2px solid #000; padding-top: 2rem; color: #000; font-weight: 700;">
+                <p>본 문서는 MQnet SmartFarm 사용자를 위한 공식 시스템 운영 가이드입니다.</p>
+                <p>© 2026 MQnet Intelligence Agriculture Team. All Rights Reserved.</p>
+            </div>
+        </article>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Scroll Reveal Effect
+        window.addEventListener('scroll', () => {
+            const reveals = document.querySelectorAll('.full-document');
+            reveals.forEach(reveal => {
+                const windowHeight = window.innerHeight;
+                const revealTop = reveal.getBoundingClientRect().top;
+                if (revealTop < windowHeight - 150) { reveal.classList.add('active'); }
+            });
+        });
+    </script>
+</body>
+
+</html>

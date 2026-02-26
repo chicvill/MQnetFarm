@@ -221,9 +221,13 @@ async def web_server_task():
     class SmartFarmHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
             # 루트 경로 접속 시 대시보드로 리다이렉트
-            if self.path == '/':
-                self.send_response(301)
-                self.send_header('Location', '/html/index.html')
+            # 루트 경로 및 /index.html 접속 시 홍보 페이지(promo.html)로 리다이렉트
+            if self.path in ['/', '/index.html']:
+                print(f"� [Web Server] Redirecting {self.path} to /html/promo.html")
+                self.send_response(302)
+                self.send_header('Location', '/html/promo.html')
+                self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+                self.send_header('Pragma', 'no-cache')
                 self.end_headers()
                 return
 
@@ -460,7 +464,7 @@ async def web_server_task():
             # socketserver.TCPServer는 블로킹이므로 스레드에서 실행
             # 파이썬 3.7+ ThreadingHTTPServer 권장되지만 호환성 위해 TCPServer 사용
             with socketserver.TCPServer(("", PORT), SmartFarmHandler) as httpd:
-                print(f"🌍 [{DATA_DIR}] 서버가 가동되었습니다: http://localhost:{PORT}/html/index.html")
+                print(f"🌍 [{DATA_DIR}] 서버가 가동되었습니다: http://localhost:{PORT}/")
                 print(f"   ㄴ API 엔드포인트: http://localhost:{PORT}/api/history")
                 server_started = True
                 await asyncio.to_thread(httpd.serve_forever)
