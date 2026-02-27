@@ -1,19 +1,19 @@
 {
-  "timestamp": "2026-02-27 20:18:28",
+  "timestamp": "2026-02-27 20:21:22",
   "nodes": {
     "AAA": {
       "sensors": [
         {
           "id": "AAA001",
           "name": "pH 센서",
-          "val": 75.28,
+          "val": 72.06,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         },
         {
           "id": "AAA002",
           "name": "EC 센서",
-          "val": 32.93,
+          "val": 55.56,
           "pin": "GPIO1(ADC)",
           "type": "analog"
         }
@@ -46,7 +46,7 @@
         {
           "id": "AAB001",
           "name": "pH 센서",
-          "val": 50.0,
+          "val": 34.89,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -69,7 +69,7 @@
         {
           "id": "AAC001",
           "name": "수위 센서",
-          "val": 37.36,
+          "val": 49.93,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -92,7 +92,7 @@
         {
           "id": "AAD001",
           "name": "온도 센서",
-          "val": 56.61,
+          "val": 77.25,
           "pin": "GPIO5",
           "type": "digital"
         }
@@ -115,7 +115,7 @@
         {
           "id": "AAE001",
           "name": "조도(PPFD) 센서",
-          "val": 52.43,
+          "val": 33.42,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -133,7 +133,7 @@
         {
           "id": "AAF001",
           "name": "DO(용존산소) 센서",
-          "val": 50.28,
+          "val": 23.46,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -151,7 +151,7 @@
         {
           "id": "AAG001",
           "name": "습도 센서",
-          "val": 56.03,
+          "val": 30.87,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -169,7 +169,7 @@
         {
           "id": "AAH001",
           "name": "CO2 센서",
-          "val": 51.65,
+          "val": 62.32,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -187,7 +187,7 @@
         {
           "id": "AAI001",
           "name": "수온 센서",
-          "val": 59.45,
+          "val": 43.63,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
@@ -210,7 +210,7 @@
         {
           "id": "AAJ001",
           "name": "양액탱크 레벨 센서",
-          "val": 21.28,
+          "val": 65.6,
           "pin": "GPIO0(ADC)",
           "type": "analog"
         }
