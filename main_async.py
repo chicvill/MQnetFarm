@@ -271,20 +271,22 @@ async def web_server_task():
             """
             try:
                 import growth_model
-                # 환경 변수를 통해 데이터 경로를 명시적으로 전달
+                # 현재 서버가 사용 중인 DATA_DIR를 환경 변수로 강제 고정
                 os.environ['DATA_DIR'] = DATA_DIR
                 result = growth_model.run_analysis_data()
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                
-                # 데이터는 growth_model에서 이미 정제되었으므로 안전함
                 self.wfile.write(json.dumps(result).encode('utf-8'))
                 
             except Exception as e:
-                print(f"❌ [AI Model] Analysis error: {e}")
-                self.send_error(500, str(e))
+                print(f"❌ [AI Model Error] {e}")
+                # 에러 발생 시에도 브라우저가 'H' 문자를 읽지 않도록 JSON으로 응답
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e), "dates": []}).encode('utf-8'))
 
         def handle_growth_analysis(self):
             try:
