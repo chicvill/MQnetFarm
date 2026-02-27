@@ -238,6 +238,8 @@ async def web_server_task():
                 self.handle_journal_list()
             elif self.path.startswith('/api/growth'):
                 self.handle_growth_list()
+            elif self.path.startswith('/api/run_model'):
+                self.handle_run_model()
             else:
                 # 기본 정적 파일 제공
                 super().do_GET()

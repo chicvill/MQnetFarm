@@ -618,11 +618,13 @@
         }
 
         function openAIModalWithData(data) {
-            // v3.9: 정밀 에러 진단 표시
+            // v4.2: 정밀 에러 진단 및 복사 가능한 에러 표시
             if (!data || !data.dates || data.success === false) {
                 const errorDetail = data ? (data.error || "데이터가 비어있습니다.") : "서버 응답이 없습니다.";
                 console.error("AI Data Error Detail:", data);
-                alert("분석 실패: " + errorDetail + "\n(데이터 폴더 경로를 확인하시거나 서버 로그를 보세요.)");
+                // 복사 가능하도록 alert 대신 prompt나 커스텀 창을 고려할 수 있으나, 팝업창에 에러코드 포함
+                const msg = "[분석 실패]\n사유: " + errorDetail + "\n\n이 메시지를 복사하여 AI에게 알려주세요.";
+                alert(msg);
                 return;
             }
 
