@@ -271,7 +271,8 @@ async def web_server_task():
             """
             try:
                 import growth_model
-                # 스크립트 실행 대신 직접 호출 (메모리 절약)
+                # 환경 변수를 통해 데이터 경로를 명시적으로 전달
+                os.environ['DATA_DIR'] = DATA_DIR
                 result = growth_model.run_analysis_data()
                 
                 self.send_response(200)
