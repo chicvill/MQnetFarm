@@ -624,41 +624,82 @@
             }
             window.aiCharts = [];
 
+            // 프리미엄 디자인 옵션 (글자 크기 상향 및 가독성 개선)
             const commonOptions = {
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#888', font: { size: 10 } } } },
+                plugins: {
+                    legend: {
+                        labels: { color: '#e0e0e0', font: { size: 22, weight: '600' }, padding: 20 }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleFont: { size: 20 },
+                        bodyFont: { size: 18 },
+                        padding: 15,
+                        cornerRadius: 10
+                    }
+                },
                 scales: {
-                    x: { ticks: { color: '#555', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: '#555', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.02)' } }
+                    x: {
+                        ticks: { color: '#999', font: { size: 16 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#999', font: { size: 16 }, padding: 10 },
+                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
+                    }
                 }
             };
 
+            // 최근 10일간의 데이터로 슬라이싱
+            const daysToView = 10;
+            const labels = data.dates.slice(-daysToView);
+
             const chartsConfig = [
                 {
-                    id: 'aiC1', type: 'line', label: '성장추세', data: data.dates.map(d => {
+                    id: 'aiC1', type: 'line', label: '생육성장 추세 (%)',
+                    data: data.dates.map(d => {
                         const idx = data.measured_growth.dates.indexOf(d);
                         return idx !== -1 ? data.measured_growth.ratios[idx] : null;
-                    }), color: '#ff4b5c'
+                    }).slice(-daysToView),
+                    color: '#ff4b5c'
                 },
                 {
                     id: 'aiC2', type: 'line', datasets: [
-                        { label: '온도', data: data.temp, borderColor: '#ffa726' },
-                        { label: '습도', data: data.humi, borderColor: '#29b6f6' }
+                        { label: '온도 (°C)', data: data.temp.slice(-daysToView), borderColor: '#ffa726', borderWidth: 4, tension: 0.4 },
+                        { label: '습도 (%)', data: data.humi.slice(-daysToView), borderColor: '#29b6f6', borderWidth: 4, tension: 0.4 }
                     ]
                 },
-                { id: 'aiC3', type: 'bar', label: '광량(PPFD)', data: data.light, color: 'rgba(255,235,59,0.4)' },
+                {
+                    id: 'aiC3', type: 'bar', label: '광량 (PPFD)',
+                    data: data.light.slice(-daysToView),
+                    color: 'rgba(255, 235, 59, 0.6)'
+                },
                 {
                     id: 'aiC4', type: 'line', datasets: [
-                        { label: 'EC', data: data.ec, borderColor: '#ba68c8' },
-                        { label: 'pH', data: data.ph, borderColor: '#4db6ac' }
+                        { label: 'EC (영양액)', data: data.ec.slice(-daysToView), borderColor: '#ba68c8', borderWidth: 4 },
+                        { label: 'pH (산도)', data: data.ph.slice(-daysToView), borderColor: '#4db6ac', borderWidth: 4 }
                     ]
                 }
             ];
 
             chartsConfig.forEach(cfg => {
                 const ctx = document.getElementById(cfg.id).getContext('2d');
-                const datasets = cfg.datasets || [{ label: cfg.label, data: cfg.data, borderColor: cfg.color, backgroundColor: cfg.color, tension: 0.3 }];
-                aiCharts.push(new Chart(ctx, { type: cfg.type, data: { labels: data.dates, datasets }, options: commonOptions }));
+                const datasets = cfg.datasets || [{
+                    label: cfg.label,
+                    data: cfg.data,
+                    borderColor: cfg.color,
+                    backgroundColor: cfg.color,
+                    borderWidth: 5,
+                    pointRadius: 6,
+                    pointBackgroundColor: cfg.color,
+                    tension: 0.4
+                }];
+                aiCharts.push(new Chart(ctx, {
+                    type: cfg.type,
+                    data: { labels: labels, datasets: datasets },
+                    options: commonOptions
+                }));
             });
         }
 
