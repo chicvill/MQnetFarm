@@ -266,7 +266,7 @@ async def web_server_task():
 
         def handle_run_model(self):
             """
-            v2.5: 서버 부하가 큰 이미지 생성 대신, 계산된 데이터(JSON)만 클라이언트에 전달합니다.
+            v2.5+: 서버 부하가 큰 이미지 생성 대신, 계산된 데이터(JSON)만 클라이언트에 전달합니다.
             그래프 드로잉은 브라우저(Chart.js)가 담당합니다.
             """
             try:
@@ -277,7 +277,10 @@ async def web_server_task():
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps(result).encode('utf-8'))
+                
+                # allow_nan=False: NaN 값을 JSON 표준인 null로 강제 변환하여 브라우저 오류 방지
+                response_json = json.dumps(result, allow_nan=False)
+                self.wfile.write(response_json.encode('utf-8'))
                 
             except Exception as e:
                 print(f"❌ [AI Model] Analysis error: {e}")
