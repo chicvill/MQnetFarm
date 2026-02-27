@@ -38,13 +38,13 @@ if "%PY_CMD%"=="" (
 
 :: 3. 서울 농장 실행 (Port 8001 / DATA_DIR seoul_data)
 echo [1/2] 서울 농장 시스템 기동 (Port: 8001)
-start "SEOUL FARM (8001)" /d "%~dp0" cmd /c "set DATA_DIR=seoul_data&& set PORT=8001&& %PY_CMD% main_async.py || pause"
+start "SEOUL FARM (8001)" /d "%~dp0" cmd /c "set DATA_DIR=seoul_data&&set PORT=8001&&%PY_CMD% main_async.py || pause"
 
 timeout /t 2 /nobreak >nul
 
 :: 4. 부산 농장 실행 (Port 8002 / DATA_DIR busan_data)
 echo [2/2] 부산 농장 시스템 기동 (Port: 8002)
-start "BUSAN FARM (8002)" /d "%~dp0" cmd /c "set DATA_DIR=busan_data&& set PORT=8002&& %PY_CMD% main_async.py || pause"
+start "BUSAN FARM (8002)" /d "%~dp0" cmd /c "set DATA_DIR=busan_data&&set PORT=8002&&%PY_CMD% main_async.py || pause"
 
 echo.
 echo -------------------------------------------------------

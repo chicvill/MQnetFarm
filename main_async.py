@@ -19,7 +19,7 @@ except ImportError:
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # 📂 데이터 폴더 설정 (환경 변수 또는 기본값)
-DATA_DIR = os.environ.get('DATA_DIR', 'data')
+DATA_DIR = os.environ.get('DATA_DIR', 'data').strip()
 
 # 오타 방지용 보정: busan-data -> busan_data
 if DATA_DIR == 'busan-data' and not os.path.exists('busan-data') and os.path.exists('busan_data'):
