@@ -35,9 +35,16 @@ def generate_mock_data(days=10, reason=""):
     }
 
 def run_analysis_data():
-    DATA_DIR = os.environ.get('DATA_DIR', 'data')
+    # 🔎 v4.4: 포트(8001/8002) 기반 자동 데이터 경로 매칭
+    PORT = str(os.environ.get('PORT', '8007'))
+    DATA_DIR = os.environ.get('DATA_DIR', 'data').strip()
     
-    # 🔎 로컬 경로 자동 보정 강화
+    # 8001이면 seoul_data, 8002이면 busan_data 우선 탐색
+    if DATA_DIR == 'data' or not DATA_DIR:
+        if PORT == '8001' and os.path.exists('seoul_data'): DATA_DIR = 'seoul_data'
+        elif PORT == '8002' and os.path.exists('busan_data'): DATA_DIR = 'busan_data'
+
+    # 최종 디렉토리 유효성 확인
     if not os.path.exists(DATA_DIR):
         for alt in ['seoul_data', 'busan_data', 'data']:
             if os.path.exists(alt):
