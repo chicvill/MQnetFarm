@@ -592,21 +592,23 @@
 
         renderJournal();
 
-        // --- AI Report Logic ---
+        // --- AI Report Logic (v2.5: Dynamic Chart.js) ---
+        let aiCharts = [];
+
         async function runAnalysisAndOpen() {
             const btn = document.getElementById('ai-btn');
             const originalHTML = btn.innerHTML;
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = `<span style="animation: spin 1s linear infinite;">⏳</span> 분석 중...`;
+                btn.innerHTML = `<span style="animation: spin 1s linear infinite;">⏳</span> AI 계산 중...`;
 
-                // 1. 서버에 모델 실행 요청
                 const res = await fetch('/api/run_model', { method: 'POST' });
                 if (!res.ok) throw new Error("분석 서버 오류");
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || "분석 실패");
 
-                // 2. 모달 열기
-                openAIModal();
+                openAIModalWithData(data);
             } catch (e) {
                 alert("분석 실패: " + e.message);
             } finally {
@@ -615,57 +617,73 @@
             }
         }
 
-        function openAIModal() {
-            const img = document.getElementById('modalImg');
-            // 캐시 방지를 위한 타임스탬프
-            const chartUrl = '/data/growth_prediction_chart.png?t=' + new Date().getTime();
+        function openAIModalWithData(data) {
+            document.getElementById('aiModal').style.display = 'flex';
+            aiCharts.forEach(c => c.destroy());
+            aiCharts = [];
 
-            img.onload = () => console.log("AI Chart loaded successfully");
-            img.onerror = () => {
-                console.error("AI Chart failed to load:", chartUrl);
-                // Fallback: try relative path if absolute fails
-                if (!img.src.includes('fallback')) {
-                    console.log("Retrying with fallback path...");
-                    img.src = '../data/growth_prediction_chart.png?fallback=1&t=' + new Date().getTime();
+            const commonOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#888', font: { size: 10 } } } },
+                scales: {
+                    x: { ticks: { color: '#555', font: { size: 9 } }, grid: { display: false } },
+                    y: { ticks: { color: '#555', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.02)' } }
                 }
             };
 
-            img.src = chartUrl;
-            document.getElementById('aiModal').style.display = 'flex';
+            const chartsConfig = [
+                {
+                    id: 'aiC1', type: 'line', label: '성장추세', data: data.dates.map(d => {
+                        const idx = data.measured_growth.dates.indexOf(d);
+                        return idx !== -1 ? data.measured_growth.ratios[idx] : null;
+                    }), color: '#ff4b5c'
+                },
+                {
+                    id: 'aiC2', type: 'line', datasets: [
+                        { label: '온도', data: data.temp, borderColor: '#ffa726' },
+                        { label: '습도', data: data.humi, borderColor: '#29b6f6' }
+                    ]
+                },
+                { id: 'aiC3', type: 'bar', label: '광량(PPFD)', data: data.light, color: 'rgba(255,235,59,0.4)' },
+                {
+                    id: 'aiC4', type: 'line', datasets: [
+                        { label: 'EC', data: data.ec, borderColor: '#ba68c8' },
+                        { label: 'pH', data: data.ph, borderColor: '#4db6ac' }
+                    ]
+                }
+            ];
+
+            chartsConfig.forEach(cfg => {
+                const ctx = document.getElementById(cfg.id).getContext('2d');
+                const datasets = cfg.datasets || [{ label: cfg.label, data: cfg.data, borderColor: cfg.color, backgroundColor: cfg.color, tension: 0.3 }];
+                aiCharts.push(new Chart(ctx, { type: cfg.type, data: { labels: data.dates, datasets }, options: commonOptions }));
+            });
         }
 
-        function closeAIModal() {
-            document.getElementById('aiModal').style.display = 'none';
-        }
+        function closeAIModal() { document.getElementById('aiModal').style.display = 'none'; }
 
-        // --- Styles for Spinner ---
         const style = document.createElement('style');
         style.innerHTML = `
             @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            #aiModal::-webkit-scrollbar { width: 8px; }
-            #aiModal::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+            .ai-box { height: 140px; margin-bottom: 20px; background: rgba(255,255,255,0.01); border-radius: 8px; padding: 10px; }
         `;
         document.head.appendChild(style);
-
     </script>
 
-    <!-- AI Report Modal -->
     <div id="aiModal"
-        style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); justify-content:center; align-items:flex-start; overflow-y:auto; padding:40px 20px;">
+        style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); backdrop-filter:blur(20px); justify-content:center; align-items:flex-start; overflow-y:auto; padding:40px 20px;">
         <div
-            style="max-width:1000px; width:100%; position:relative; background: #0a0a0c; border: 1px solid var(--border); border-radius:24px; padding:30px; box-shadow:0 0 50px rgba(0,0,0,0.5);">
-            <div
-                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:15px;">
-                <h2 style="font-size:1.5rem; display:flex; align-items:center; gap:10px;">
-                    <i data-lucide="brain-circuit" style="color:var(--primary)"></i> AI 생육 분석 및 환경 통합 리포트
-                </h2>
+            style="max-width:700px; width:100%; background:#08080a; border:1px solid rgba(255,255,255,0.05); border-radius:30px; padding:30px; box-shadow:0 40px 100px rgba(0,0,0,0.9);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:1.1rem; color:#fff; display:flex; align-items:center; gap:10px;"><i
+                        data-lucide="sparkles" style="color:var(--primary)"></i> AI 분석 리포트</h2>
                 <button onclick="closeAIModal()"
-                    style="background:rgba(255,255,255,0.05); border:none; color:white; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;">&times;</button>
+                    style="background:none; border:none; color:#555; cursor:pointer; font-size:24px;">&times;</button>
             </div>
-            <img id="modalImg" src="" style="width:100%; border-radius:12px; display:block;">
-            <p style="margin-top:20px; color:var(--text-muted); font-size:0.85rem; text-align:center;">
-                * 본 분석은 로지스틱 성장 모델과 적산온도(GDD) 기반으로 산출되었습니다.
-            </p>
+            <div class="ai-box"><canvas id="aiC1"></canvas></div>
+            <div class="ai-box"><canvas id="aiC2"></canvas></div>
+            <div class="ai-box"><canvas id="aiC3"></canvas></div>
+            <div class="ai-box"><canvas id="aiC4"></canvas></div>
         </div>
     </div>
 </body>
