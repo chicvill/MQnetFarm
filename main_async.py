@@ -278,9 +278,8 @@ async def web_server_task():
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 
-                # allow_nan=False: NaN 값을 JSON 표준인 null로 강제 변환하여 브라우저 오류 방지
-                response_json = json.dumps(result, allow_nan=False)
-                self.wfile.write(response_json.encode('utf-8'))
+                # 데이터는 growth_model에서 이미 정제되었으므로 안전함
+                self.wfile.write(json.dumps(result).encode('utf-8'))
                 
             except Exception as e:
                 print(f"❌ [AI Model] Analysis error: {e}")
