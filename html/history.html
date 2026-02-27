@@ -618,10 +618,11 @@
         }
 
         function openAIModalWithData(data) {
-            // v3.5: 데이터 유효성 검사 (로컬/서버 동기화 에러 방지)
-            if (!data || !data.dates || !Array.isArray(data.dates)) {
-                console.error("AI Data Error:", data);
-                alert("분석 실패: 데이터를 정상적으로 불러오지 못했습니다. 서버 로그를 확인하거나 페이지를 새로고침하세요.");
+            // v3.9: 정밀 에러 진단 표시
+            if (!data || !data.dates || data.success === false) {
+                const errorDetail = data ? (data.error || "데이터가 비어있습니다.") : "서버 응답이 없습니다.";
+                console.error("AI Data Error Detail:", data);
+                alert("분석 실패: " + errorDetail + "\n(데이터 폴더 경로를 확인하시거나 서버 로그를 보세요.)");
                 return;
             }
 
