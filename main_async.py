@@ -259,8 +259,36 @@ async def web_server_task():
                 self.handle_journal_post()
             elif self.path.startswith('/api/analyze_growth'):
                 self.handle_growth_analysis()
+            elif self.path.startswith('/api/run_model'):
+                self.handle_run_model()
             else:
                 self.send_error(404, "Endpoint not found")
+
+        def handle_run_model(self):
+            """
+            외부 Python 스크립트(growth_model.py)를 실행하여 분석 리포트 이미지를 갱신합니다.
+            """
+            import subprocess
+            try:
+                # 1. 모델 실행 (v2: 환경 변속 명시적 전달)
+                import os
+                cmd = [sys.executable, "growth_model.py"]
+                result = subprocess.run(cmd, capture_output=True, text=True, check=True, env=os.environ)
+                
+                print(f"🚀 [AI Model] Analysis executed successfully:\n{result.stdout}")
+                
+                # 2. 결과 응답
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": "Analysis completed"}).encode('utf-8'))
+                
+            except subprocess.CalledProcessError as e:
+                print(f"❌ [AI Model] Error during execution: {e.stderr}")
+                self.send_error(500, f"Model execution failed: {e.stderr}")
+            except Exception as e:
+                print(f"❌ [AI Model] Unexpected error: {e}")
+                self.send_error(500, str(e))
 
         def handle_growth_analysis(self):
             try:

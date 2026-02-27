@@ -29,7 +29,7 @@ set PORT=8007
 
 echo [0] 파이썬 버전 확인: %PY_CMD%
 echo [1] 필수 라이브러리 확인 및 설치 중...
-"%PY_CMD%" -m pip install opencv-python numpy requests >nul 2>nul
+"%PY_CMD%" -m pip install -r requirements.txt >nul 2>nul
 
 echo [2] Chrome 브라우저에서 홈페이지를 여는 중...
 echo     접속 주소: http://localhost:%PORT%
