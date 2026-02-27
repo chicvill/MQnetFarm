@@ -673,19 +673,20 @@
     </script>
 
     <div id="aiModal"
-        style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); backdrop-filter:blur(20px); justify-content:center; align-items:flex-start; overflow-y:auto; padding:40px 20px;">
+        style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(25px); justify-content:center; align-items:flex-start; overflow-y:auto; padding:20px;">
         <div
-            style="max-width:1100px; width:100%; background:#08080a; border:1px solid rgba(255,255,255,0.05); border-radius:30px; padding:40px; box-shadow:0 40px 100px rgba(0,0,0,0.9);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <h2 style="font-size:1.4rem; color:#fff; display:flex; align-items:center; gap:12px;"><i
-                        data-lucide="sparkles" style="color:var(--primary)"></i> AI 정밀 머신러닝 리포트</h2>
+            style="max-width:1400px; width:95%; background:#08080a; border:1px solid rgba(255,255,255,0.1); border-radius:30px; padding:40px; box-shadow:0 50px 100px rgba(0,0,0,1); margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+                <h2 style="font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:15px;"><i
+                        data-lucide="sparkles" style="color:var(--primary)"></i> AI 정밀 머신러닝 리포트 <span
+                        style="font-size:0.8rem; color:var(--primary); opacity:0.7;">v2.8</span></h2>
                 <button onclick="closeAIModal()"
-                    style="background:none; border:none; color:#555; cursor:pointer; font-size:28px;">&times;</button>
+                    style="background:rgba(255,255,255,0.05); border:none; color:#fff; width:45px; height:45px; border-radius:50%; cursor:pointer; font-size:32px; line-height:1;">&times;</button>
             </div>
-            <div class="ai-box"><canvas id="aiC1"></canvas></div>
-            <div class="ai-box"><canvas id="aiC2"></canvas></div>
-            <div class="ai-box"><canvas id="aiC3"></canvas></div>
-            <div class="ai-box"><canvas id="aiC4"></canvas></div>
+            <div class="ai-box" style="height:350px !important; margin-bottom:40px;"><canvas id="aiC1"></canvas></div>
+            <div class="ai-box" style="height:350px !important; margin-bottom:40px;"><canvas id="aiC2"></canvas></div>
+            <div class="ai-box" style="height:350px !important; margin-bottom:40px;"><canvas id="aiC3"></canvas></div>
+            <div class="ai-box" style="height:350px !important; margin-bottom:40px;"><canvas id="aiC4"></canvas></div>
         </div>
     </div>
 </body>
