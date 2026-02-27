@@ -4,5 +4,3 @@ requests
 gspread
 google-auth
 python-dotenv
-scipy
-matplotlib

@@ -2,10 +2,19 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-from scipy.optimize import curve_fit
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+try:
+    from scipy.optimize import curve_fit
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+
+try:
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
 
 # 1. 환경 설정 및 임계 온도 정의
 BASE_TEMP = 10.0  # 작물 성장 하한 온도 (예: 토마토 10도, 상추 5도)
