@@ -379,6 +379,7 @@
 
     <script>
         lucide.createIcons();
+        var aiCharts = []; // Move to global top scope
 
         // --- Date Init ---
         document.getElementById('date-picker').valueAsDate = new Date();
@@ -593,7 +594,6 @@
         renderJournal();
 
         // --- AI Report Logic (v2.5: Dynamic Chart.js) ---
-        var aiCharts = [];
 
         async function runAnalysisAndOpen() {
             const btn = document.getElementById('ai-btn');
@@ -619,8 +619,10 @@
 
         function openAIModalWithData(data) {
             document.getElementById('aiModal').style.display = 'flex';
-            aiCharts.forEach(c => c.destroy());
-            aiCharts = [];
+            if (window.aiCharts && Array.isArray(window.aiCharts)) {
+                window.aiCharts.forEach(c => { if (c) c.destroy(); });
+            }
+            window.aiCharts = [];
 
             const commonOptions = {
                 responsive: true, maintainAspectRatio: false,
