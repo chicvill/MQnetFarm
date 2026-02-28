@@ -19,17 +19,17 @@ except ImportError:
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # 📂 데이터 폴더 설정 (환경 변수 또는 기본값)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get('DATA_DIR', 'data').strip()
 
-# 오타 방지용 보정: busan-data -> busan_data
-if DATA_DIR == 'busan-data' and not os.path.exists('busan-data') and os.path.exists('busan_data'):
+# 오타 방지용 보정
+if DATA_DIR == 'busan-data' and not os.path.exists(os.path.join(BASE_DIR, 'busan-data')) and os.path.exists(os.path.join(BASE_DIR, 'busan_data')):
     DATA_DIR = 'busan_data'
 
 set_data_dir(DATA_DIR)
 
-print(f"🔧 [System] Python Executable: {sys.executable}")
-print(f"🔧 [System] CWD: {os.getcwd()}")
-print(f"📂 [System] Using Data Directory: {DATA_DIR}")
+print(f"🔧 [System] BASE_DIR: {BASE_DIR}")
+print(f"📂 [System] DATA_DIR: {DATA_DIR}")
 
 # Vision Analysis (Optional)
 try:
@@ -220,15 +220,24 @@ async def web_server_task():
 
     class SmartFarmHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
-            # 루트 경로 접속 시 대시보드로 리다이렉트
-            # 루트 경로 및 /index.html 접속 시 홍보 페이지(promo.html)로 리다이렉트
-            if self.path in ['/', '/index.html']:
-                print(f"� [Web Server] Redirecting {self.path} to /html/promo.html")
-                self.send_response(302)
-                self.send_header('Location', '/html/promo.html')
-                self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-                self.send_header('Pragma', 'no-cache')
+            # Health Check (Render용)
+            if self.path == '/health':
+                self.send_response(200)
                 self.end_headers()
+                self.wfile.write(b"OK")
+                return
+
+            # 루트 경로 접속 시 대시보드로 즉시 서빙 (Redirect 이슈 방지)
+            if self.path in ['/', '/index.html']:
+                promo_path = os.path.join(BASE_DIR, 'html', 'promo.html')
+                if os.path.exists(promo_path):
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html; charset=utf-8')
+                    self.end_headers()
+                    with open(promo_path, 'rb') as f:
+                        self.wfile.write(f.read())
+                else:
+                    self.send_error(404, f"File Not Found: {promo_path}")
                 return
 
             # API 요청 처리
@@ -245,15 +254,15 @@ async def web_server_task():
                 super().do_GET()
 
         def translate_path(self, path):
-            # URL에서 쿼리 스트링(?t=...) 제거 후 순수 경로만 추출
             parsed_path = urllib.parse.urlparse(path).path
             
-            # /data/ 요청을 실제 DATA_DIR 폴더로 매핑
+            # /data/ 요청을 실제 DATA_DIR 폴더로 매핑 (절대 경로 보정)
             if parsed_path.startswith('/data/'):
-                rel_path = parsed_path[len('/data/'):]
-                new_path = os.path.join(os.getcwd(), DATA_DIR, rel_path)
-                return new_path
-            return super().translate_path(path)
+                rel_path = parsed_path[len('/data/'):].lstrip('/')
+                return os.path.join(BASE_DIR, DATA_DIR, rel_path)
+            
+            # 모든 정적 파일 요청을 BASE_DIR 기준으로 변환
+            return os.path.join(BASE_DIR, parsed_path.lstrip('/'))
 
         def do_POST(self):
             # API 요청 처리 (POST)
