@@ -61,18 +61,27 @@
         }
 
         .logo {
-            width: 40px;
+            width: auto;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
+            background: transparent;
+            border-radius: 0;
             margin-bottom: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: none;
             flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
+        }
+
+        .logo span {
+            color: var(--primary);
         }
 
         .nav-item {

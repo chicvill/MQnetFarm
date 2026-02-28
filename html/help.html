@@ -49,40 +49,83 @@
             align-items: center;
             padding: 2rem 0;
             z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
         }
 
         .logo {
-            width: 40px;
+            width: auto;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
-            margin-bottom: 2rem;
+            background: transparent;
+            border-radius: 0;
+            margin-bottom: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-weight: 800;
-            font-size: 0.8rem;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            font-size: 1.5rem;
+            box-shadow: none;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
+        }
+
+        .logo span {
+            color: var(--primary);
         }
 
         .nav-item {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
+            width: 100%;
+            height: 50px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
         }
 
-        .nav-item:hover {
-            color: var(--primary);
-            background: rgba(255, 255, 255, 0.05);
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
         }
 
         /* --- Main Content --- */
@@ -332,10 +375,39 @@
 
 <body>
     <nav class="sidebar">
-        <div class="logo">MQ</div>
-        <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i></a>
-        <a href="cctv.html" class="nav-item"><i data-lucide="camera"></i></a>
-        <a href="help.html" class="nav-item" style="color: var(--primary);"><i data-lucide="help-circle"></i></a>
+        <div class="logo"><span>MQ</span>net</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="help.html" class="nav-item active">
+            <i data-lucide="help-circle" class="nav-icon"></i>
+            <span class="nav-label">도움말 (Help)</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
     </nav>
 
     <main class="main-content">

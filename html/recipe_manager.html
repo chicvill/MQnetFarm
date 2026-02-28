@@ -6,17 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFarm | Recipe Manager</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@300;400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --primary: #2ECC71;
-            --secondary: #3498DB;
-            --bg: #0F172A;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text: #F8FAFC;
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #F59E0B;
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
         }
 
         * {
@@ -27,41 +32,135 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 40px;
-            background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%);
+            display: flex;
+            overflow: hidden;
         }
 
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: auto;
+            height: 40px;
+            background: transparent;
+            border-radius: 0;
+            margin-bottom: 3rem;
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: none;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
         }
 
-        h1 .icon {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
         button {
@@ -203,21 +302,65 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="toolbar">
-            <h1><a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 2.5rem;"
-                    title="메인으로 이동">🏠</a><span class="icon">🌱</span> 작물 레시피 관리 (Recipe Manager)</h1>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="copyRecipeJson()">📋 설정 복사</button>
-                <button onclick="downloadRecipeJson()">💾 파일 저장</button>
-                <button onclick="showAddModal()">+ 새 작물 레시피 추가</button>
+    <nav class="sidebar">
+        <div class="logo"><span>MQ</span>net</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="help.html" class="nav-item">
+            <i data-lucide="help-circle" class="nav-icon"></i>
+            <span class="nav-label">도움말 (Help)</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item active">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>작물 레시피 관리 (Recipe Manager)</h1>
+                <p>Plant Growth Recipe & Automation Presets</p>
             </div>
-        </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="copyRecipeJson()"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px);">📋
+                    파일 구조 복사</button>
+                <button onclick="downloadRecipeJson()"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px);">💾
+                    파일 저장</button>
+                <button onclick="showAddModal()"
+                    style="background: var(--primary); border: none; color: #000; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.3s; box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);">+
+                    새 레시피 추가</button>
+            </div>
+        </header>
 
         <div id="recipeGrid" class="recipe-grid">
             <!-- Loaded via JS -->
         </div>
-    </div>
+    </main>
 
     <!-- Edit Modal (Simplified for demo) -->
     <div id="editModal" class="modal">

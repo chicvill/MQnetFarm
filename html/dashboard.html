@@ -6,16 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFarm Live Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #0b0e14;
-            --card: #161b22;
-            --accent: #00d2ff;
-            --accent-green: #39ff14;
-            --accent-red: #ff3131;
-            --text-main: #e6edf3;
-            --text-dim: #8b949e;
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
         }
 
         * {
@@ -26,22 +33,148 @@
         }
 
         body {
-            background: var(--bg);
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
             color: var(--text-main);
-            padding: 2rem;
-            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
 
-        .header {
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: auto;
+            height: 40px;
+            background: transparent;
+            border-radius: 0;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: none;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+            background-clip: padding-box;
+        }
+
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
         }
 
-        .header h1 {
+        .page-title h1 {
             font-size: 2rem;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -101,16 +234,31 @@
         }
 
         .node-card {
-            background: var(--card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 1.5rem;
-            transition: transform 0.3s;
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.3;
         }
 
         .node-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .node-header {
@@ -123,46 +271,76 @@
         }
 
         .node-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--accent);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
         .device-list {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* Custom Scrollbar for Device List */
+        .device-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .device-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .device-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 242, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .device-list::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         .device-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.8rem;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
         }
 
         .device-label {
-            font-size: 0.75rem;
-            color: var(--text-dim);
+            font-size: 0.8rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-        }
-
-        .device-value {
-            font-size: 1.4rem;
+            letter-spacing: 0.05em;
             font-weight: 600;
         }
 
+        .device-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         .device-value.active {
-            color: var(--accent-green);
-            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            color: var(--success);
+            text-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
         }
 
         .chart-container {
-            height: 150px;
-            margin-top: 1rem;
+            height: 250px;
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 10px;
         }
 
         .loading-overlay {
@@ -171,7 +349,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--bg);
+            background: var(--bg-dark);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -182,10 +360,16 @@
         .loader {
             width: 50px;
             height: 50px;
-            border: 5px solid var(--card);
-            border-top-color: var(--accent);
+            border: 5px solid var(--bg-panel);
+            border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes spin {
@@ -200,24 +384,70 @@
     <div class="loading-overlay" id="loader">
         <div class="loader"></div>
     </div>
+    <nav class="sidebar">
+        <div class="logo"><span>MQ</span>net</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item active">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="help.html" class="nav-item">
+            <i data-lucide="help-circle" class="nav-icon"></i>
+            <span class="nav-label">도움말 (Help)</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
 
-    <div class="header">
-        <a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 1.5rem;"
-            title="Go to Mission Control">🏠</a>
-        <h1>🌌 SmartFarm Live Monitoring</h1>
-        <div id="last-update" class="status-badge">대기 중...</div>
-    </div>
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>실시간 모니터 (Live Dashboard)</h1>
+            </div>
+            <div id="last-update" class="status-badge"
+                style="padding: 0.5rem 1rem; border-radius: 50px; background: rgba(0, 242, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); font-size: 0.9rem;">
+                Connecting...
+            </div>
+        </header>
 
-    <div class="filter-container">
-        <label for="node-selector">📍 노드 선택:</label>
-        <select id="node-selector" class="node-select">
-            <option value="all">전체 보기</option>
-        </select>
-    </div>
+        <div class="filter-container"
+            style="display: flex; align-items: center; gap: 10px; background: var(--bg-panel); padding: 1rem; border-radius: 15px; border: 1px solid var(--border); backdrop-filter: var(--glass);">
+            <label for="node-selector" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">📍 노드 선택
+                (Node Focus):</label>
+            <select id="node-selector" class="node-select" onchange="filterNode()"
+                style="background: #101014; color: var(--text-main); border: 1px solid var(--primary); padding: 0.5rem 1rem; border-radius: 8px; outline: none; cursor: pointer; font-size: 1rem; min-width: 150px; transition: all 0.3s;">
+                <option value="all">전체 보기 (All Nodes)</option>
+            </select>
+            <button onclick="updateDashboard()"
+                style="margin-left:auto; background: var(--primary); color: #000; border:none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer;">새로고침
+                (Refresh)</button>
+        </div>
 
-    <div class="dashboard-grid" id="node-grid">
-        <!-- Node cards will be injected here -->
-    </div>
+        <div class="dashboard-grid" id="node-grid">
+            <!-- Node cards will be injected here -->
+        </div>
+    </main>
 
     <script>
         const charts = {}; // Store chart instances
@@ -273,7 +503,7 @@
                 console.error("Dashboard error:", e);
                 lastUpdate.textContent = "⚠️ 연결 오류: " + e.message;
                 lastUpdate.style.background = 'rgba(255, 49, 49, 0.1)';
-                lastUpdate.style.color = 'var(--accent-red)';
+                lastUpdate.style.color = 'var(--danger)';
 
                 // 에러 발생 시에도 로딩 화면은 일정 시간 후 제거 (사용자가 에러 메시지를 볼 수 있게 함)
                 setTimeout(() => {

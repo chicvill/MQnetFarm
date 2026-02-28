@@ -7,6 +7,16 @@ data/live_data.json
 data/smartfarm_tsdb.csv
 data/growth_log.json
 data/journal.json
+seoul_data/live_data.json
+seoul_data/smartfarm_tsdb.csv
+seoul_data/growth_log.json
+seoul_data/journal.json
+busan_data/live_data.json
+busan_data/smartfarm_tsdb.csv
+busan_data/growth_log.json
+busan_data/journal.json
+**/tsdb_*.csv
+**/*.tmp
 
 # Credentials and Secrets
 credentials.json

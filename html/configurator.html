@@ -6,21 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFarm | Device Configurator</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --primary: #10B981;
-            --secondary: #3B82F6;
-            --bg: #0F172A;
-            --sidebar-bg: #1E293B;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #F8FAFC;
-            --text-dim: #94A3B8;
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #F59E0B;
-            --danger: #EF4444;
-            --glass-blur: 15px;
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --success: #00ff9d;
+            --warning: #ffb800;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8899ac;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(20px);
         }
 
         * {
@@ -31,45 +32,132 @@
         }
 
         body {
-            background: radial-gradient(circle at top right, #1E293B, #0F172A);
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* --- Header --- */
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 80px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: var(--glass);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .logo {
+            width: auto;
+            height: 40px;
+            background: transparent;
+            border-radius: 0;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: none;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            font-family: 'Outfit', sans-serif;
+            padding: 0 5px;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+            transition-delay: 0.1s;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         header {
             padding: 1.5rem 2rem;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(var(--glass-blur));
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: var(--glass);
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        header h1 {
-            font-family: 'Outfit', sans-serif;
+        .page-title h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        header .toolbar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            margin: 0;
         }
 
         /* --- Buttons & Inputs --- */
@@ -143,25 +231,24 @@
             gap: 1.5rem;
             padding: 2rem;
             flex-grow: 1;
-            max-width: 1600px;
-            margin: 0 auto;
             width: 100%;
+            overflow-y: auto;
         }
 
-        .sidebar {
-            background: var(--card-bg);
-            backdrop-filter: blur(var(--glass-blur));
+        .config-sidebar {
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 1.5rem;
             height: fit-content;
-            max-height: calc(100vh - 120px);
+            max-height: 100%;
             overflow-y: auto;
         }
 
         .editor-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(var(--glass-blur));
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
             border: 1px solid var(--border);
             border-radius: 24px;
             padding: 2rem;
@@ -283,76 +370,127 @@
 </head>
 
 <body>
+    <nav class="sidebar">
+        <div class="logo"><span>MQ</span>net</div>
+        <a href="index.html" class="nav-item">
+            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+            <span class="nav-label">대시보드 (Overview)</span>
+        </a>
+        <a href="cctv.html" class="nav-item">
+            <i data-lucide="camera" class="nav-icon"></i>
+            <span class="nav-label">영상 관제 (CCTV)</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i data-lucide="activity" class="nav-icon"></i>
+            <span class="nav-label">실시간 모니터</span>
+        </a>
+        <a href="history.html" class="nav-item">
+            <i data-lucide="file-text" class="nav-icon"></i>
+            <span class="nav-label">분석 및 일지</span>
+        </a>
+        <a href="help.html" class="nav-item">
+            <i data-lucide="help-circle" class="nav-icon"></i>
+            <span class="nav-label">도움말 (Help)</span>
+        </a>
+        <a href="infra_tree.html" class="nav-item">
+            <i data-lucide="network" class="nav-icon"></i>
+            <span class="nav-label">인프라 관리</span>
+        </a>
+        <a href="configurator.html" class="nav-item active">
+            <i data-lucide="settings" class="nav-icon"></i>
+            <span class="nav-label">장치 설정</span>
+        </a>
+        <a href="recipe_manager.html" class="nav-item">
+            <i data-lucide="workflow" class="nav-icon"></i>
+            <span class="nav-label">자동화/레시피</span>
+        </a>
+    </nav>
 
-    <header>
-        <h1><a href="index.html" style="text-decoration: none; margin-right: 1rem; font-size: 1.5rem;"
-                title="메인으로 이동">🏠</a><span>🌱</span> 장치 설정 (Configurator)</h1>
-        <div class="toolbar">
-            <button class="btn" onclick="document.getElementById('file-input').click()">📂 설정 불러오기</button>
-            <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
-
-            <button class="btn btn-primary" onclick="promptNewNode()">+ 노드 추가</button>
-            <button class="btn btn-secondary" onclick="downloadConfig()">💾 파일 저장</button>
-            <button class="btn" onclick="copyJson()">📋 JSON 복사</button>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h3 class="section-title">운용 중인 노드 목록</h3>
-            <div id="node-list">
-                <!-- Node items -->
+    <main class="main-content">
+        <header>
+            <div class="page-title">
+                <h1>장치 설정 (Configurator)</h1>
             </div>
-        </div>
+            <div class="toolbar">
+                <button class="btn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px);"
+                    onclick="document.getElementById('file-input').click()">📂 설정 불러오기</button>
+                <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
 
-        <!-- Editor -->
-        <div class="editor-panel">
-            <div id="empty-state" style="text-align: center; padding: 5rem; color: var(--text-dim);">
-                <div style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;">📡</div>
-                <p>목록에서 노드를 선택하여 설정을 변경하세요.</p>
+                <button class="btn"
+                    style="background: var(--primary); border: none; color: #000; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.3s; box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);"
+                    onclick="promptNewNode()">+ 노드 추가</button>
+                <button class="btn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px);"
+                    onclick="downloadConfig()">💾 파일 저장</button>
+                <button class="btn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px);"
+                    onclick="copyJson()">📋 JSON 복사</button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            <div class="config-sidebar">
+                <h3 class="section-title">운용 중인 노드 목록</h3>
+                <div id="node-list">
+                    <!-- Node items -->
+                </div>
             </div>
 
-            <div id="editor-content" style="display: none;">
-                <div class="section-title">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-size: 1.5rem;">📦</span>
-                        <input type="text" id="node-id-display"
-                            style="background:transparent; border:none; padding:0; font-size: 1.8rem; font-weight: 800; color:var(--primary); width: 120px;">
+            <!-- Editor -->
+            <div class="editor-panel">
+                <div id="empty-state" style="text-align: center; padding: 5rem; color: var(--text-muted);">
+                    <div style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;">📡</div>
+                    <p>목록에서 노드를 선택하여 설정을 변경하세요.</p>
+                </div>
+
+                <div id="editor-content" style="display: none;">
+                    <div class="section-title">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="font-size: 1.5rem;">📦</span>
+                            <input type="text" id="node-id-display"
+                                style="background:transparent; border:none; padding:0; font-size: 1.8rem; font-weight: 800; color:var(--primary); width: 120px;">
+                        </div>
+                        <div id="node-context-info"
+                            style="margin-left:auto; text-align:right; font-size:0.8rem; color:var(--text-muted); display:flex; flex-direction:column;">
+                            <!-- Date/Stage injected here -->
+                        </div>
+                        <button class="btn"
+                            style="background: rgba(255, 0, 85, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 5px 15px; border-radius: 8px; margin-left: 20px; cursor: pointer;"
+                            onclick="deleteNode(activeNodeIndex)">노드 삭제 (Delete)</button>
                     </div>
-                    <div id="node-context-info"
-                        style="margin-left:auto; text-align:right; font-size:0.8rem; color:var(--text-dim); display:flex; flex-direction:column;">
-                        <!-- Date/Stage injected here -->
+
+                    <!-- Sensors -->
+                    <div class="section-title"
+                        style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <span>🌡️ 센서 설정 (Input)</span>
+                        <button class="btn"
+                            style="background: var(--primary); border: none; color: #000; padding: 5px 15px; border-radius: 8px; font-weight: 700; cursor: pointer;"
+                            onclick="addSensor()">+ 센서 추가</button>
                     </div>
-                    <button class="btn btn-danger" style="margin-left: 20px;" onclick="deleteNode(activeNodeIndex)">노드
-                        삭제 (Delete)</button>
-                </div>
+                    <div id="sensor-list"></div>
 
-                <!-- Sensors -->
-                <div class="section-title"
-                    style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                    <span>🌡️ 센서 설정 (Input)</span>
-                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;"
-                        onclick="addSensor()">+ 센서 추가</button>
+                    <!-- Actuators -->
+                    <div class="section-title"
+                        style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <span>⚙️ 구동기 설정 (Output)</span>
+                        <button class="btn"
+                            style="background: var(--primary); border: none; color: #000; padding: 5px 15px; border-radius: 8px; font-weight: 700; cursor: pointer;"
+                            onclick="addActuator()">+ 구동기 추가</button>
+                    </div>
+                    <div id="actuator-list"></div>
                 </div>
-                <div id="sensor-list"></div>
-
-                <!-- Actuators -->
-                <div class="section-title"
-                    style="margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                    <span>⚙️ 구동기 설정 (Output)</span>
-                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;"
-                        onclick="addActuator()">+ 구동기 추가</button>
-                </div>
-                <div id="actuator-list"></div>
             </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <h3 class="section-title">📄 JSON Preview</h3>
-        <pre id="json-output">// No data</pre>
-    </div>
+        <div class="footer"
+            style="padding: 2rem; background: rgba(10, 10, 12, 0.9); border-top: 1px solid var(--border);">
+            <h3 class="section-title">📄 JSON Preview</h3>
+            <pre id="json-output"
+                style="background: #000; color: var(--primary); padding: 1.5rem; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid var(--border);">// No data</pre>
+        </div>
+    </main>
 
     <script>
         let nodes = [];
@@ -613,6 +751,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
             document.getElementById('node-id-display').addEventListener('input', (e) => updateNodeId(e.target.value));
 
             await loadCatalog();

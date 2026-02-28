@@ -1,12 +1,42 @@
 services:
-  mqnet-farm:
-    container_name: mqnet-farm-system
+  # 1. 서울 농장 (Port 8001 -> 8000)
+  mqnet-seoul:
+    container_name: mqnet-seoul
     build: .
+    environment:
+      - PORT=8000
+      - DATA_DIR=seoul_data
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./seoul_data:/app/seoul_data
+      - ./html:/app/html
+    restart: unless-stopped
+
+  # 2. 부산 농장 (Port 8002 -> 8000)
+  mqnet-busan:
+    container_name: mqnet-busan
+    build: .
+    environment:
+      - PORT=8000
+      - DATA_DIR=busan_data
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./busan_data:/app/busan_data
+      - ./html:/app/html
+    restart: unless-stopped
+
+  # 3. 기본 농장 (Port 8000 -> 8000)
+  mqnet-default:
+    container_name: mqnet-default
+    build: .
+    environment:
+      - PORT=8000
+      - DATA_DIR=data
     ports:
       - "8000:8000"
     volumes:
-      # Data persistence
       - ./data:/app/data
-      # Hot-reload for HTML (Optional)
       - ./html:/app/html
     restart: unless-stopped
