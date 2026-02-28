@@ -561,6 +561,41 @@
                 display: block;
             }
 
+            .mobile-dropdown {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: rgba(15, 15, 20, 0.95);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                padding: 1rem;
+                z-index: 999;
+            }
+
+            .mobile-dropdown.show {
+                display: flex;
+            }
+
+            .mobile-nav-item {
+                padding: 1rem;
+                color: var(--text-muted);
+                text-decoration: none;
+                font-size: 1.1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .mobile-nav-item:last-child {
+                border-bottom: none;
+            }
+
+            .mobile-nav-item.active {
+                color: var(--primary);
+                font-weight: 700;
+            }
+
             .main-content {
                 padding: 1rem;
             }
@@ -581,9 +616,9 @@
 
     <!-- Top Navigation Bar -->
     <nav class="top-navbar">
-        <div class="logo" onclick="location.href='../index.html'"><span>MQ</span>net SmartFarm</div>
+        <div class="logo" onclick="location.href='/'"><span>MQ</span>net SmartFarm</div>
 
-        <div class="nav-links">
+        <div class="nav-links" id="desktop-nav">
             <a href="index.html" class="nav-item active">
                 <i data-lucide="layout-dashboard" size="18"></i>
                 <span class="nav-label">대시보드</span>
@@ -613,8 +648,19 @@
             </a>
         </div>
 
-        <div class="mobile-toggle">
+        <div class="mobile-toggle" id="mobile-menu-btn">
             <i data-lucide="menu" size="24"></i>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div class="mobile-dropdown" id="mobile-dropdown">
+            <a href="index.html" class="mobile-nav-item active">대시보드</a>
+            <a href="cctv.html" class="mobile-nav-item">CCTV</a>
+            <a href="dashboard.html" class="mobile-nav-item">모니터링</a>
+            <a href="history.html" class="mobile-nav-item">분석일지</a>
+            <a href="infra_tree.html" class="mobile-nav-item">인프라</a>
+            <a href="recipe_manager.html" class="mobile-nav-item">자동화</a>
+            <a href="help.html" class="mobile-nav-item">도움말</a>
         </div>
     </nav>
 
@@ -820,7 +866,88 @@
 
     </main>
 
+    <style>
+        /* Basic styling for mobile menu button */
+        .mobile-menu-button {
+            display: none;
+            /* Hidden by default on larger screens */
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            z-index: 1001;
+        }
+
+        /* Mobile dropdown content */
+        .mobile-dropdown-content {
+            display: none;
+            /* Hidden by default */
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            right: 1rem;
+            top: 4rem;
+            /* Adjust based on header height */
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .mobile-dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .mobile-dropdown-content a:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .mobile-dropdown-content.show {
+            display: block;
+        }
+
+        /* Media query for mobile devices */
+        @media (max-width: 768px) {
+            header {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                padding-right: 4rem;
+                /* Make space for the button */
+            }
+
+            .system-status {
+                display: none;
+                /* Hide status pills on mobile */
+            }
+
+            .mobile-menu-button {
+                display: block;
+                /* Show button on mobile */
+            }
+
+            .page-title {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+
     <script>
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function () {
+            const dropdown = document.getElementById('mobile-dropdown');
+            dropdown.classList.toggle('show');
+        });
+
         // Icon initialization
         lucide.createIcons();
 
