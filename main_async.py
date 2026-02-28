@@ -227,8 +227,8 @@ async def web_server_task():
                 self.wfile.write(b"OK")
                 return
 
-            # 루트 경로 접속 시 대시보드로 즉시 서빙 (Redirect 이슈 방지)
-            if self.path in ['/', '/index.html']:
+            # 루트 경로 접속 시 홍보 페이지(promo.html) 즉시 서빙
+            if self.path == '/':
                 promo_path = os.path.join(BASE_DIR, 'html', 'promo.html')
                 if os.path.exists(promo_path):
                     self.send_response(200)
