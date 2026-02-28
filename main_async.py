@@ -259,6 +259,10 @@ async def web_server_task():
             parsed_path = urllib.parse.urlparse(path).path
             file_name = parsed_path.lstrip('/')
             
+            # 0. 중복된 html/ 경로 보정 (ex: html/html/index.html -> html/index.html)
+            if 'html/html/' in file_name:
+                file_name = file_name.replace('html/html/', 'html/')
+
             # 1. /data/ 요청을 실제 DATA_DIR 폴더로 매핑 (절대 경로 보정)
             if parsed_path.startswith('/data/'):
                 rel_path = parsed_path[len('/data/'):].lstrip('/')
