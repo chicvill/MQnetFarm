@@ -5,6 +5,7 @@ services:
     env: docker
     plan: free
     region: singapore
+    branch: main
     healthCheckPath: /health
     envVars:
       - key: DATA_DIR
@@ -18,6 +19,7 @@ services:
     env: docker
     plan: free
     region: singapore
+    branch: main
     healthCheckPath: /health
     envVars:
       - key: DATA_DIR
@@ -31,6 +33,7 @@ services:
     env: docker
     plan: free
     region: singapore
+    branch: main
     healthCheckPath: /health
     envVars:
       - key: DATA_DIR
