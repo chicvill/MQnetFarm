@@ -229,7 +229,7 @@ async def web_server_task():
 
             # [Routing] 루트(/) 접속 시 promo.html로 명시적 리다이렉트 (주소창 일치를 위함)
             parsed_path = urllib.parse.urlparse(self.path).path
-            print(f"🔍 [HTTP] Request: {self.path}")
+            print(f"🔍 [HTTP] Request: {self.path}", flush=True)
             
             if parsed_path == '/':
                 self.send_response(302)

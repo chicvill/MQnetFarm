@@ -493,19 +493,27 @@
 
         // Sample Data
         let cameras = [
-            { name: "CAM-01", loc: "Zone A: 상추 생육실", url: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?q=80&w=800&auto=format&fit=crop" },
-            { name: "CAM-02", loc: "Zone B: 육묘장", url: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?q=80&w=800&auto=format&fit=crop" },
-            { name: "CAM-03 (Wireless)", loc: "Zone C: 이동식 로봇", url: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?q=80&w=800&auto=format&fit=crop" }
+            { name: "CAM-01 (상추 수직농장)", loc: "Zone A: 상추 생육실", url: "https://www.youtube.com/embed/n4yEvyH0CXY?autoplay=1&mute=1&loop=1&playlist=n4yEvyH0CXY&controls=0&showinfo=0&rel=0" },
+            { name: "CAM-02 (타임랩스)", loc: "Zone B: 육묘장", url: "https://www.youtube.com/embed/Wb1M5rKxWMI?autoplay=1&mute=1&loop=1&playlist=Wb1M5rKxWMI&controls=0&showinfo=0&rel=0" },
+            { name: "CAM-03 (토마토)", loc: "Zone C: 이동식 로봇", url: "https://www.youtube.com/embed/A8n4HmsqFpA?autoplay=1&mute=1&loop=1&playlist=A8n4HmsqFpA&controls=0&showinfo=0&rel=0" }
         ];
 
         let editIndex = -1;
 
         function renderCameras() {
             const grid = document.getElementById('cam-grid');
-            grid.innerHTML = cameras.map((c, i) => `
+            grid.innerHTML = cameras.map((c, i) => {
+                let mediaTag = `<img src="${c.url}" alt="${c.name}" onerror="this.src='https://placehold.co/600x400?text=No+Signal'">`;
+                if (c.url.includes('youtube.com/embed/')) {
+                    mediaTag = `<iframe src="${c.url}" frameborder="0" allow="autoplay; encrypted-media" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none; opacity: 0.85;"></iframe>`;
+                } else if (c.url.endsWith('.mp4') || c.url.endsWith('.webm')) {
+                    mediaTag = `<video src="${c.url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;"></video>`;
+                }
+
+                return `
                 <div class="cam-card">
-                    <div class="cam-feed" onclick="openFullscreen(${i})" style="cursor:zoom-in" title="클릭하여 확대">
-                        <img src="${c.url}" alt="${c.name}" onerror="this.src='https://placehold.co/600x400?text=No+Signal'">
+                    <div class="cam-feed" onclick="if(!'${c.url}'.includes('youtube.com/embed/')) openFullscreen(${i})" style="${!c.url.includes('youtube.com/embed/') ? 'cursor:zoom-in;' : ''}" title="${!c.url.includes('youtube.com/embed/') ? '클릭하여 확대' : 'LIVE'}">
+                        ${mediaTag}
                         <div class="cam-overlay">
                             <div class="rec-dot"></div> LIVE
                         </div>
@@ -522,7 +530,8 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             // Add 'New Camera' card
             grid.innerHTML += `
@@ -613,11 +622,17 @@
 
             lucide.createIcons();
 
+            let targetUrl = url;
+            // Demo fallback for sample youtube videos 
+            if (url.includes('youtube.com')) {
+                targetUrl = "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?q=80&w=800&auto=format&fit=crop";
+            }
+
             try {
                 const res = await fetch('/api/analyze_growth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
+                    body: JSON.stringify({ url: targetUrl })
                 });
 
                 const data = await res.json();
@@ -677,6 +692,7 @@
         // Init
         renderCameras();
         lucide.createIcons();
-</body >
+    </script>
+</body>
 
-</html >
+</html>

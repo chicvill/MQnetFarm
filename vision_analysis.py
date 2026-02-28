@@ -10,15 +10,29 @@ def analyze_plant_growth(image_source):
     """
     try:
         # 1. 이미지 로드
+        image = None
         if image_source.startswith('http'):
-            # URL 이미지 다운로드
+            # Detect whether it's an MJPEG stream or a static image
             try:
                 resp = requests.get(image_source, stream=True, timeout=5)
-                if resp.status_code == 200:
-                    image_array = np.asarray(bytearray(resp.content), dtype="uint8")
-                    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+                content_type = resp.headers.get('Content-Type', '').lower()
+                
+                if 'multipart' in content_type or 'video' in content_type:
+                    # It's an MJPEG stream. We must close the request and use OpenCV VideoCapture
+                    resp.close()
+                    cap = cv2.VideoCapture(image_source)
+                    if cap.isOpened():
+                        ret, frame = cap.read()
+                        if ret:
+                            image = frame
+                        cap.release()
                 else:
-                    return {"error": f"Failed to download image (Status: {resp.status_code})"}
+                    # It's a static image. Safe to read the whole content
+                    if resp.status_code == 200:
+                        image_array = np.asarray(bytearray(resp.content), dtype="uint8")
+                        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+                    else:
+                        return {"error": f"Failed to download image (Status: {resp.status_code})"}
             except Exception as e:
                 return {"error": f"Download Error: {str(e)}"}
         else:
@@ -77,7 +91,7 @@ def analyze_plant_growth(image_source):
             "green_pixels": green_pixels,
             "total_pixels": total_pixels,
             "ratio": round(growth_ratio, 2),
-            "image_url": save_name,
+            "image_url": "html/" + save_name,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
         }
         
