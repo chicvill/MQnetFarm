@@ -227,10 +227,9 @@ async def web_server_task():
                 self.wfile.write(b"OK")
                 return
 
-            # 루트 경로(/) 또는 /index.html 접속 시 홍보 페이지(promo.html) 즉시 서빙
-            # (만약 Dashboard를 가고 싶다면 /html/index.html 또는 /dashboard.html 등을 통해 접근)
+            # 루트 경로(/) 접속 시 홍보 페이지(promo.html) 즉시 서빙
             parsed_path = urllib.parse.urlparse(self.path).path
-            if parsed_path in ('/', '/index.html', '/index.htm'):
+            if parsed_path in ('/', '/promo.html'):
                 promo_path = os.path.join(BASE_DIR, 'html', 'promo.html')
                 if os.path.exists(promo_path):
                     self.send_response(200)
