@@ -2,8 +2,10 @@ services:
   # 1. 서울 농장 (Seoul Farm)
   - type: web
     name: mqnet-farm-seoul
-    runtime: docker
+    env: docker
     plan: free
+    region: singapore
+    healthCheckPath: /health
     envVars:
       - key: DATA_DIR
         value: seoul_data
@@ -13,8 +15,10 @@ services:
   # 2. 부산 농장 (Busan Farm)
   - type: web
     name: mqnet-farm-busan
-    runtime: docker
+    env: docker
     plan: free
+    region: singapore
+    healthCheckPath: /health
     envVars:
       - key: DATA_DIR
         value: busan_data
@@ -24,8 +28,10 @@ services:
   # 3. 기본 농장 (Default Farm)
   - type: web
     name: mqnet-farm-default
-    runtime: docker
+    env: docker
     plan: free
+    region: singapore
+    healthCheckPath: /health
     envVars:
       - key: DATA_DIR
         value: data
