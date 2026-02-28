@@ -751,6 +751,16 @@
                 }
             ];
 
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8899ac' } } },
+                scales: {
+                    x: { ticks: { color: '#8899ac' }, grid: { display: false } },
+                    y: { ticks: { color: '#8899ac' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            };
+
             chartsConfig.forEach(cfg => {
                 const ctx = document.getElementById(cfg.id).getContext('2d');
                 const datasets = cfg.datasets || [{
