@@ -491,8 +491,8 @@ async def web_server_task():
         try:
             # socketserver.TCPServer는 블로킹이므로 스레드에서 실행
             # 파이썬 3.7+ ThreadingHTTPServer 권장되지만 호환성 위해 TCPServer 사용
-            with socketserver.TCPServer(("", PORT), SmartFarmHandler) as httpd:
-                print(f"🌍 [{DATA_DIR}] 서버가 가동되었습니다: http://localhost:{PORT}/")
+            with socketserver.TCPServer(("0.0.0.0", PORT), SmartFarmHandler) as httpd:
+                print(f"🌍 [{DATA_DIR}] 서버가 가동되었습니다: http://0.0.0.0:{PORT}/")
                 print(f"   ㄴ API 엔드포인트: http://localhost:{PORT}/api/history")
                 server_started = True
                 await asyncio.to_thread(httpd.serve_forever)
