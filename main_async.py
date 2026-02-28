@@ -256,13 +256,20 @@ async def web_server_task():
         def translate_path(self, path):
             parsed_path = urllib.parse.urlparse(path).path
             
-            # /data/ 요청을 실제 DATA_DIR 폴더로 매핑 (절대 경로 보정)
+            # 1. /data/ 요청을 실제 DATA_DIR 폴더로 매핑 (절대 경로 보정)
             if parsed_path.startswith('/data/'):
                 rel_path = parsed_path[len('/data/'):].lstrip('/')
                 return os.path.join(BASE_DIR, DATA_DIR, rel_path)
             
-            # 모든 정적 파일 요청을 BASE_DIR 기준으로 변환
-            return os.path.join(BASE_DIR, parsed_path.lstrip('/'))
+            # 2. .html 요청인 경우 /html/ 폴더 내 파일이 있는지 우선 확인
+            file_name = parsed_path.lstrip('/')
+            if file_name.endswith('.html'):
+                html_path = os.path.join(BASE_DIR, 'html', file_name)
+                if os.path.exists(html_path):
+                    return html_path
+                    
+            # 3. 모든 정적 파일 요청을 BASE_DIR 기준으로 변환
+            return os.path.join(BASE_DIR, file_name)
 
         def do_POST(self):
             # API 요청 처리 (POST)
