@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQnet SmartFarm | 인공지능 클라우드 스마트팜</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>MQnet SmartFarm - 지능형 농장 자동화</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet">
@@ -33,69 +33,131 @@
             scroll-behavior: smooth;
         }
 
-        /* --- Navbar --- */
-        nav {
+        /* --- Premium Pull-down Navigation --- */
+        .top-navbar {
+            height: 60px;
+            background: rgba(5, 5, 8, 0.9);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 1.5rem 4rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            background: rgba(5, 5, 5, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 3000;
         }
 
         .logo {
-            font-size: 1.8rem;
             font-weight: 800;
-            letter-spacing: -1px;
+            font-size: 1.3rem;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
         }
 
         .logo span {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary);
         }
 
         .nav-links {
             display: flex;
-            gap: 2.5rem;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
             align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
+            gap: 8px;
             color: var(--text-muted);
+            text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .nav-links a:hover {
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Mobile Menu (Pull-down Overlay) */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 8, 0.98);
+            backdrop-filter: blur(30px);
+            z-index: 2500;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            transition: top 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+            opacity: 0;
+        }
+
+        .mobile-menu-overlay.open {
+            top: 0;
+            opacity: 1;
+        }
+
+        .mobile-nav-item {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-item:hover,
+        .mobile-nav-item.active {
             color: var(--primary);
         }
 
-        .cta-button {
-            padding: 0.8rem 1.8rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #000;
-            border-radius: 50px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        .mobile-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            position: relative;
+            z-index: 3100;
         }
 
-        .cta-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .hero-content h1 {
+                font-size: 3rem !important;
+            }
+
+            .hero-content p {
+                font-size: 1rem !important;
+            }
+
+            section {
+                padding: 4rem 1.5rem !important;
+            }
         }
 
         /* --- Hero Section --- */
@@ -216,21 +278,40 @@
 </head>
 
 <body>
-    <nav>
-        <div class="logo"><span>MQ</span>net SmartFarm</div>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="logo" onclick="location.href='/'">
+            <i data-lucide="leaf" style="color:var(--primary)"></i>
+            <span>MQ</span>net SmartFarm
+        </div>
+
         <div class="nav-links">
-            <a href="#features">솔루션</a>
-            <a href="#tech">기술스택</a>
-            <a href="html/help.html">고객지원</a>
-            <a href="html/index.html" class="cta-button">시스템 접속 (Console)</a>
+            <a href="home.html" class="nav-item">홈</a>
+            <a href="index.html" class="nav-item">대시보드</a>
+            <a href="cctv.html" class="nav-item">CCTV</a>
+            <a href="help.html" class="nav-item">도움말</a>
+            <a href="index.html" class="nav-item cta-button" style="color:#000">지금 시작하기 (FREE)</a>
+        </div>
+
+        <div class="mobile-toggle" id="menu-toggle">
+            <i data-lucide="menu" id="menu-icon"></i>
         </div>
     </nav>
+
+    <!-- Premium Pull-down Mobile Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu">
+        <a href="home.html" class="mobile-nav-item">홈페이지 Home</a>
+        <a href="index.html" class="mobile-nav-item">통계 대시보드</a>
+        <a href="cctv.html" class="mobile-nav-item">실시간 CCTV</a>
+        <a href="help.html" class="mobile-nav-item">도움말 Center</a>
+        <a href="index.html" class="cta-button" style="margin-top:1rem; color:#000">FREE START</a>
+    </div>
 
     <section class="hero">
         <h1>미래 농업의 기준,<br><span>AI 클라우드 스마트팜</span></h1>
         <p>전 세계 어디서나 농장을 한눈에 관리하고 제어하세요. 최첨단 인공지능과 클라우드 아키텍처가 당신의 농업 생산성을 극대화합니다.</p>
         <div style="display: flex; gap: 1.5rem;">
-            <a href="html/index.html" class="cta-button" style="padding: 1.2rem 3rem; font-size: 1.1rem;">지금 시작하기
+            <a href="index.html" class="cta-button" style="padding: 1.2rem 3rem; font-size: 1.1rem;">지금 시작하기
                 (FREE)</a>
             <a href="#features"
                 style="padding: 1.2rem 3rem; border: 1px solid rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 50px; font-weight: 700;">더
@@ -261,13 +342,27 @@
         <div class="footer-links">
             <a href="#">회사소개</a>
             <a href="docs/USER_MANUAL.md">사용자 매뉴얼</a>
-            <a href="html/help.html">유지보수 가이드</a>
+            <a href="help.html">유지보수 가이드</a>
             <a href="#">개인정보처리방침</a>
         </div>
         <p class="copyright">© 2026 MQnet Intelligence Agriculture Team. All Rights Reserved.</p>
     </footer>
 
     <script>
+        // Premium Pull-down Menu Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                const isOpen = mobileMenu.classList.toggle('open');
+                menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+                lucide.createIcons();
+                document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+            });
+        }
+
         lucide.createIcons();
     </script>
 </body>

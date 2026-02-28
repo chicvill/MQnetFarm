@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartFarm | Device Configurator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>장치 설정 (Config) - SmartFarm</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
@@ -31,113 +31,150 @@
             font-family: 'Inter', sans-serif;
         }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
-            color: var(--text-main);
-            min-height: 100vh;
+        /* --- Premium Pull-down Navigation --- */
+        .top-navbar {
+            height: 60px;
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--border);
             display: flex;
-            overflow: hidden;
-        }
-
-        /* --- Sidebar Navigation --- */
-        .sidebar {
-            width: 80px;
-            background: rgba(10, 10, 12, 0.8);
-            backdrop-filter: var(--glass);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 2rem 0;
-            z-index: 100;
-            transition: width 0.3s ease;
-        }
-
-        .sidebar:hover {
-            width: 240px;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 3000;
         }
 
         .logo {
-            width: auto;
-            height: 40px;
-            background: transparent;
-            border-radius: 0;
-            margin-bottom: 3rem;
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.5rem;
-            box-shadow: none;
-            flex-shrink: 0;
-            letter-spacing: -1px;
-            color: var(--text-main);
-            text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-            font-family: 'Outfit', sans-serif;
-            padding: 0 5px;
+            gap: 10px;
+            cursor: pointer;
         }
 
         .logo span {
             color: var(--primary);
         }
 
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         .nav-item {
-            width: 100%;
-            height: 50px;
             display: flex;
             align-items: center;
-            padding: 0 1.5rem;
+            gap: 8px;
             color: var(--text-muted);
             text-decoration: none;
-            transition: all 0.2s;
-            position: relative;
-            cursor: pointer;
-            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .nav-item:hover,
         .nav-item.active {
             color: var(--text-main);
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
+        /* Mobile Menu (Pull-down Overlay) */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: -100%;
             left: 0;
-            top: 0;
+            width: 100%;
             height: 100%;
-            width: 3px;
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-        }
-
-        .nav-icon {
-            margin-right: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .nav-label {
+            background: rgba(5, 5, 8, 0.98);
+            backdrop-filter: blur(30px);
+            z-index: 2500;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            transition: top 0.5s cubic-bezier(0.7, 0, 0.3, 1);
             opacity: 0;
-            white-space: nowrap;
-            transition: opacity 0.2s;
-            font-weight: 500;
         }
 
-        .sidebar:hover .nav-label {
+        .mobile-menu-overlay.open {
+            top: 0;
             opacity: 1;
-            transition-delay: 0.1s;
         }
 
-        /* --- Main Content --- */
+        .mobile-nav-item {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .mobile-nav-item:hover,
+        .mobile-nav-item.active {
+            color: var(--primary);
+        }
+
+        .mobile-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            position: relative;
+            z-index: 3100;
+        }
+
+        /* --- Main Content (Mobile-First) --- */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: var(--glass);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .main-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            header {
+                flex-direction: row !important;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem 2rem;
+            }
         }
 
         header {
@@ -370,41 +407,37 @@
 </head>
 
 <body>
-    <nav class="sidebar">
-        <div class="logo"><span>MQ</span>net</div>
-        <a href="index.html" class="nav-item">
-            <i data-lucide="layout-dashboard" class="nav-icon"></i>
-            <span class="nav-label">대시보드 (Overview)</span>
-        </a>
-        <a href="cctv.html" class="nav-item">
-            <i data-lucide="camera" class="nav-icon"></i>
-            <span class="nav-label">영상 관제 (CCTV)</span>
-        </a>
-        <a href="dashboard.html" class="nav-item">
-            <i data-lucide="activity" class="nav-icon"></i>
-            <span class="nav-label">실시간 모니터</span>
-        </a>
-        <a href="history.html" class="nav-item">
-            <i data-lucide="file-text" class="nav-icon"></i>
-            <span class="nav-label">분석 및 일지</span>
-        </a>
-        <a href="help.html" class="nav-item">
-            <i data-lucide="help-circle" class="nav-icon"></i>
-            <span class="nav-label">도움말 (Help)</span>
-        </a>
-        <a href="infra_tree.html" class="nav-item">
-            <i data-lucide="network" class="nav-icon"></i>
-            <span class="nav-label">인프라 관리</span>
-        </a>
-        <a href="configurator.html" class="nav-item active">
-            <i data-lucide="settings" class="nav-icon"></i>
-            <span class="nav-label">장치 설정</span>
-        </a>
-        <a href="recipe_manager.html" class="nav-item">
-            <i data-lucide="workflow" class="nav-icon"></i>
-            <span class="nav-label">자동화/레시피</span>
-        </a>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="logo" onclick="location.href='/'">
+            <i data-lucide="leaf" style="color:var(--primary)"></i>
+            <span>MQ</span>net SmartFarm
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-item">대시보드</a>
+            <a href="cctv.html" class="nav-item">CCTV</a>
+            <a href="dashboard.html" class="nav-item">모니터링</a>
+            <a href="history.html" class="nav-item">분석일지</a>
+            <a href="infra_tree.html" class="nav-item">인프라</a>
+            <a href="recipe_manager.html" class="nav-item">자동화</a>
+        </div>
+
+        <div class="mobile-toggle" id="menu-toggle">
+            <i data-lucide="menu" id="menu-icon"></i>
+        </div>
     </nav>
+
+    <!-- Premium Pull-down Mobile Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu">
+        <a href="index.html" class="mobile-nav-item">대시보드</a>
+        <a href="cctv.html" class="mobile-nav-item">실시간 CCTV</a>
+        <a href="dashboard.html" class="mobile-nav-item">센서 모니터링</a>
+        <a href="history.html" class="mobile-nav-item">데이터 분석일지</a>
+        <a href="infra_tree.html" class="mobile-nav-item">인프라 관리</a>
+        <a href="recipe_manager.html" class="mobile-nav-item">자동화 설정</a>
+        <a href="help.html" class="mobile-nav-item">도움말 Center</a>
+    </div>
 
     <main class="main-content">
         <header>
@@ -751,6 +784,20 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
+            // Premium Pull-down Menu Toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    const isOpen = mobileMenu.classList.toggle('open');
+                    menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+                    lucide.createIcons();
+                    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+                });
+            }
+
             lucide.createIcons();
             document.getElementById('node-id-display').addEventListener('input', (e) => updateNodeId(e.target.value));
 
