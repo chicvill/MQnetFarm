@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQnetFarm Smart System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>MQnet SmartFarm | Mobile Dashboard</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
@@ -108,31 +108,90 @@
             cursor: pointer;
         }
 
-        /* --- Main Content --- */
+        /* --- Main Content (Mobile-First) --- */
         .main-content {
             flex: 1;
-            padding: 1.5rem 2rem;
+            padding: 1rem;
+            /* Compact padding for mobile */
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1rem;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* --- Header --- */
         header {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
             margin-bottom: 0.5rem;
         }
 
         .page-title h1 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
+            /* Smaller for mobile */
             font-weight: 700;
             background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .page-title p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .system-status {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* --- Dashboard Grid (Mobile-First) --- */
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            /* Stack vertically on mobile */
+            gap: 1rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            /* Slightly rounder for modern mobile feel */
+            padding: 1.25rem;
+            transition: transform 0.2s;
+        }
+
+        /* Stats specialized for mobile */
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* Two columns for cards on small screens */
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* --- Flow / CCTV / Actions --- */
+        .flow-container,
+        .cctv-container,
+        .action-container {
+            width: 100%;
+        }
+
+        .flow-container {
+            height: 400px;
+            /* Controlled height for mobile scrolling */
+            overflow: hidden;
         }
 
         .page-title p {
@@ -527,85 +586,51 @@
             }
         }
 
-        /* --- Responsive Queries --- */
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+        /* --- Tablet & Desktop Overrides (Mobile-First approach) --- */
+        @media (min-width: 769px) {
+            .main-content {
+                padding: 2rem;
+                gap: 2rem;
             }
 
-            .flow-container {
-                grid-row: auto;
-                height: 500px;
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .page-title h1 {
+                font-size: 2.2rem;
+            }
+
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: 350px 1fr 300px;
+                grid-template-rows: auto;
+                gap: 2rem;
             }
 
             .stats-container {
+                display: flex;
+                flex-direction: column;
                 grid-column: 1;
+            }
+
+            .flow-container {
+                grid-column: 2;
+                height: auto;
             }
 
             .action-container {
-                grid-column: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .top-navbar {
-                padding: 0 1rem;
+                grid-column: 3;
             }
 
             .nav-links {
-                display: none;
-                /* Simple hide for now, could be burger menu */
-            }
-
-            .mobile-toggle {
-                display: block;
-            }
-
-            .mobile-dropdown {
-                display: none;
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background: rgba(15, 15, 20, 0.95);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--border);
-                flex-direction: column;
-                padding: 1rem;
-                z-index: 999;
-            }
-
-            .mobile-dropdown.show {
                 display: flex;
             }
 
-            .mobile-nav-item {
-                padding: 1rem;
-                color: var(--text-muted);
-                text-decoration: none;
-                font-size: 1.1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            }
-
-            .mobile-nav-item:last-child {
-                border-bottom: none;
-            }
-
-            .mobile-nav-item.active {
-                color: var(--primary);
-                font-weight: 700;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 1.5rem;
-            }
-
-            .flow-diagram {
-                transform: scale(0.8);
+            .mobile-toggle {
+                display: none;
             }
         }
     </style>
