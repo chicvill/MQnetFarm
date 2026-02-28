@@ -227,8 +227,10 @@ async def web_server_task():
                 self.wfile.write(b"OK")
                 return
 
-            # 루트 경로 접속 시 홍보 페이지(promo.html) 즉시 서빙
-            if self.path == '/':
+            # 루트 경로(/) 또는 /index.html 접속 시 홍보 페이지(promo.html) 즉시 서빙
+            # (만약 Dashboard를 가고 싶다면 /html/index.html 또는 /dashboard.html 등을 통해 접근)
+            parsed_path = urllib.parse.urlparse(self.path).path
+            if parsed_path in ('/', '/index.html', '/index.htm'):
                 promo_path = os.path.join(BASE_DIR, 'html', 'promo.html')
                 if os.path.exists(promo_path):
                     self.send_response(200)
@@ -255,6 +257,7 @@ async def web_server_task():
 
         def translate_path(self, path):
             parsed_path = urllib.parse.urlparse(path).path
+            file_name = parsed_path.lstrip('/')
             
             # 1. /data/ 요청을 실제 DATA_DIR 폴더로 매핑 (절대 경로 보정)
             if parsed_path.startswith('/data/'):
@@ -262,8 +265,12 @@ async def web_server_task():
                 return os.path.join(BASE_DIR, DATA_DIR, rel_path)
             
             # 2. .html 요청인 경우 /html/ 폴더 내 파일이 있는지 우선 확인
-            file_name = parsed_path.lstrip('/')
             if file_name.endswith('.html'):
+                # 이미 'html/' 경로가 포함되어 있다면 중복 방지
+                if file_name.startswith('html/'):
+                    return os.path.join(BASE_DIR, file_name)
+                
+                # 포함되어 있지 않다면 'html/' 폴더 안에서 검색
                 html_path = os.path.join(BASE_DIR, 'html', file_name)
                 if os.path.exists(html_path):
                     return html_path
