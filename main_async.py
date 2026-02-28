@@ -227,12 +227,18 @@ async def web_server_task():
                 self.wfile.write(b"OK")
                 return
 
-            # [Routing] 루트(/) 정적 접속 시 promo.html 서빙
-            # 단, /index.html 등 구체적인 파일 요청은 translate_path로 넘겨서 대시보드가 뜨게 함
+            # [Routing] 루트(/) 접속 시 promo.html로 명시적 리다이렉트 (주소창 일치를 위함)
             parsed_path = urllib.parse.urlparse(self.path).path
             print(f"🔍 [HTTP] Request: {self.path}")
             
             if parsed_path == '/':
+                self.send_response(302)
+                self.send_header('Location', '/promo.html')
+                self.end_headers()
+                return
+
+            # promo.html 요청 시 html/promo.html 서빙
+            if parsed_path == '/promo.html':
                 promo_path = os.path.join(BASE_DIR, 'html', 'promo.html')
                 if os.path.exists(promo_path):
                     self.send_response(200)
